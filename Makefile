@@ -8,14 +8,11 @@ OUT = ./out
 
 all: main
 
-main: main.o worldgen.o
-	$(CC) $(CFLAGS) $(LIBS) main.o worldgen.o -o $(OUT)/main
+main: $(OUT)/main.o $(OUT)/worldgen.o
+	$(CC) $(CFLAGS) $(LIBS) $(OUT)/main.o $(OUT)/worldgen.o -o $(OUT)/main
 
-%.o: ./src/%.c
-	$(CC) $(CFLAGS) -c $<
-
-%.o: ./lib/%.c
-	$(CC) $(CFLAGS) -c $<
+$(OUT)/%.o: ./src/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -f *.o main worldgen
