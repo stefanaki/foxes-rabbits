@@ -6,13 +6,13 @@ LIBS =
 SHELL = /bin/bash
 OUT = ./out
 
-all: main
+all: $(OUT)/main
 
-main: $(OUT)/main.o $(OUT)/worldgen.o $(OUT)/cell.o
-	$(CC) $(CFLAGS) $(LIBS) $(OUT)/main.o $(OUT)/worldgen.o $(OUT)/cell.o -o $(OUT)/main
+$(OUT)/main: $(OUT)/main.o $(OUT)/worldgen.o
+	$(CC) $(CFLAGS) $(LIBS) $(OUT)/main.o $(OUT)/worldgen.o -o $@
 
 $(OUT)/%.o: ./src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f *.o main worldgen
+	rm -f $(OUT)/*
