@@ -1,18 +1,45 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "worldgen.h"
-#include "cell.h"
+#include "worldstructs.h"
 
-int main()
+int main(int argc, char **argv)
 {
-    uint32_t x = 10;
+    // foxes-rabbits <# generations> <M> <N> <# rocks> <# rabbits>
+    //  <rabbit breeding> <# foxes> <fox breeding> <fox starvation> <seed>
 
-    printf("%f\n", r4_uni(&x));
+    // example of initial args
+    // 10 5 5 10 3 6 2 6 8 10
+    uint32_t generations = atoi(argv[1]);
+    uint32_t M = atoi(argv[2]);
+    uint32_t N = atoi(argv[3]);
+    uint32_t n_rocks = atoi(argv[4]);
+    uint32_t n_rabbits = atoi(argv[5]);
+    uint32_t rabbit_breeding = atoi(argv[6]);
+    uint32_t n_foxes = atoi(argv[7]);
+    uint32_t fox_breeding = atoi(argv[8]);
+    uint32_t fox_starvation = atoi(argv[9]);
+    uint32_t seed = atoi(argv[10]);
 
-    Cell cell = (Cell){.boardIndex = 10};
-    printf("%d\n", cell.boardIndex);
-    printf("%d\n", cell.modified);
-    printf("%d\n", cell.element.breedingAge);
+    Board board = (Board){};
+    board.cells = (Cell **)malloc(sizeof(Cell) * M);
+    for (int i = 0; i < M; i++)
+    {
+        board.cells[i] = (Cell *)malloc(sizeof(Cell) * N);
+    }
 
-    printf("hello world\n");
+    generate_element(2, FOX, &seed, &board, M, N);
+    generate_element(3, RABBIT, &seed, &board, M, N);
+    generate_element(10, ROCK, &seed, &board, M, N);
+
+    for (int i = 0; i < M; i++)
+    {
+        for (int j = 0; j < N; j++)
+        {
+            printf("%d\t", board.cells[i][j].element.type);
+        }
+        printf("\n");
+    }
+
     return 0;
 }
