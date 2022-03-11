@@ -21,22 +21,22 @@ int main(int argc, char **argv)
     uint32_t fox_starvation = atoi(argv[9]);
     uint32_t seed = atoi(argv[10]);
 
-    Board board = (Board){};
-    board.cells = (Cell **)malloc(sizeof(Cell) * M);
+    Board board = (Board){ .row_size = M, .column_size = N };
+    board.grid = (Cell **)malloc(sizeof(Cell) * M);
     for (int i = 0; i < M; i++)
     {
-        board.cells[i] = (Cell *)malloc(sizeof(Cell) * N);
+        board.grid[i] = (Cell *)malloc(sizeof(Cell) * N);
     }
 
-    generate_element(2, FOX, &seed, &board, M, N);
-    generate_element(3, RABBIT, &seed, &board, M, N);
-    generate_element(10, ROCK, &seed, &board, M, N);
+    generate_element(2, FOX, &seed, &board);
+    generate_element(3, RABBIT, &seed, &board);
+    generate_element(10, ROCK, &seed, &board);
 
     for (int i = 0; i < M; i++)
     {
         for (int j = 0; j < N; j++)
         {
-            printf("%d\t", board.cells[i][j].element.type);
+            printf("%d\t", board.grid[i][j].element.type);
         }
         printf("\n");
     }

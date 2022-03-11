@@ -20,22 +20,22 @@ float r4_uni(uint32_t *seed)
 
 void insert_animal(int i, int j, char atype, Board *board)
 {
-    board->cells[i][j].element.type = atype;
+    board->grid[i][j].element.type = atype;
 }
 
 bool position_empty(int i, int j, Board *board)
 {
-    return board->cells[i][j].element.type == EMPTY;
+    return board->grid[i][j].element.type == EMPTY;
 }
 
-void generate_element(int n, char atype, uint32_t *seed, Board *board, int M, int N)
+void generate_element(int n, char atype, uint32_t *seed, Board *board)
 {
     int i, j, k;
 
     for (k = 0; k < n; k++)
     {
-        i = M * r4_uni(seed);
-        j = N * r4_uni(seed);
+        i = board->row_size * r4_uni(seed);
+        j = board->column_size * r4_uni(seed);
         if (position_empty(i, j, board))
         {
             insert_animal(i, j, atype, board);
