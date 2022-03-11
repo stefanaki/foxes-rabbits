@@ -25,12 +25,12 @@ typedef struct Cell
     Element element;
     bool modified;
     Element new_elements[4];
-    u_int32_t board_index;
+    uint32_t board_index;
 } Cell;
 
 typedef struct Board
 {
-    Cell **cells;
+    Cell **grid;
     int column_size;
     int row_size;
 } Board;
