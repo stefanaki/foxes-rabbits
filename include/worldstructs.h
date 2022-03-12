@@ -7,24 +7,30 @@
 enum ElementType
 {
     EMPTY,
-    RABBIT,
-    FOX,
+    ANIMAL,
     ROCK
 };
 
-typedef struct Element
+enum AnimalType
 {
-    char type;
+    RABBIT,
+    FOX
+};
+
+typedef struct Animal
+{
+    enum AnimalType type;
     uint16_t breeding_age;
-    uint16_t starvation_age;
+    uint16_t starvation_age; //null if type==Rabbit
     bool has_moved;
-} Element;
+} Animal;
 
 typedef struct Cell
 {
-    Element element;
+    enum ElementType type;
+    Animal *animal; //null if type!=animal
     bool modified;
-    Element new_elements[4];
+    Animal new_animals[4];
     uint32_t board_index;
 } Cell;
 
