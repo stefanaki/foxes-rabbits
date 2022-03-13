@@ -10,3 +10,8 @@ bool position_empty(int i, int j, Board *board)
 {
   return board->grid[i][j].type == EMPTY;
 }
+
+bool position_processed(int i, int j, Board *board){
+  //function to see if cell has already been processed (modified==true)
+  return false;
+}

@@ -3,6 +3,10 @@
 #include "worldgen.h"
 #include "worldstructs.h"
 
+uint32_t fox_breeding;
+uint32_t fox_starvation;
+uint32_t rabbit_breeding;
+
 int main(int argc, char **argv)
 {
     // foxes-rabbits <# generations> <M> <N> <# rocks> <# rabbits>
@@ -15,10 +19,10 @@ int main(int argc, char **argv)
     uint32_t N = atoi(argv[3]);
     uint32_t n_rocks = atoi(argv[4]);
     uint32_t n_rabbits = atoi(argv[5]);
-    uint32_t rabbit_breeding = atoi(argv[6]);
+    rabbit_breeding = atoi(argv[6]);
     uint32_t n_foxes = atoi(argv[7]);
-    uint32_t fox_breeding = atoi(argv[8]);
-    uint32_t fox_starvation = atoi(argv[9]);
+    fox_breeding = atoi(argv[8]);
+    fox_starvation = atoi(argv[9]);
     uint32_t seed = atoi(argv[10]);
 
     Board board = (Board){ .row_size = M, .column_size = N };
