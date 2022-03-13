@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "worldstructs.h"
+#include "worldgen.h"
+
 
 float r4_uni(uint32_t *seed)
 {

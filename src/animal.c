@@ -1,4 +1,10 @@
-#include "animal.h"
+#include "worldstructs.h"
+#include "cell.h"
+
+bool breeding_status(Animal *animal){
+  return animal->breeding_age==animal->age;
+}
+
 
 void move(int i, int j, Board *board, int n_i, int n_j){
   if (position_empty(n_i, n_j, board)) return;
@@ -13,8 +19,3 @@ void move(int i, int j, Board *board, int n_i, int n_j){
   }
 
 }
-
-bool breeding_status(Animal *animal){
-  return animal->breeding_age==animal->age;
-}
-
