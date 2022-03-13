@@ -4,6 +4,9 @@
 #ifndef ANIMAL_LIB_H__
 #define ANIMAL_LIB_H__
 
+void insert_animal(int, int, enum ElementType, Board *);
+
+
 void die(Cell *);
 void eat(Animal *, Cell *);
 void move(int, int, Board *, int, int);

@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include "worldstructs.h"
 #include "cell.h"
+#include "animal.h"
 
 #ifndef WORLDGEN_LIB_H__
 #define WORLDGEN_LIB_H__
