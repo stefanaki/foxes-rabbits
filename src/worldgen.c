@@ -17,16 +17,6 @@ float r4_uni(uint32_t *seed)
     return r;
 }
 
-void insert_animal(int i, int j, enum ElementType atype, Board *board)
-{
-    board->grid[i][j].type = atype;
-}
-
-bool position_empty(int i, int j, Board *board)
-{
-    return board->grid[i][j].type == EMPTY;
-}
-
 void generate_element(int n, enum ElementType atype, uint32_t *seed, Board *board)
 {
     int i, j, k;
