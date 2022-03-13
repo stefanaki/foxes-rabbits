@@ -1,8 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
-#include "worldstructs.h"
+#include "world.h"
 #include "worldgen.h"
-
 
 float r4_uni(uint32_t *seed)
 {
@@ -19,17 +18,17 @@ float r4_uni(uint32_t *seed)
     return r;
 }
 
-void generate_element(int n, enum ElementType atype, uint32_t *seed, Board *board)
+void generate_element(int n, char atype, uint32_t *seed, World *world)
 {
     int i, j, k;
 
     for (k = 0; k < n; k++)
     {
-        i = board->row_size * r4_uni(seed);
-        j = board->column_size * r4_uni(seed);
-        if (position_empty(i, j, board))
+        i = world->row_size * r4_uni(seed);
+        j = world->column_size * r4_uni(seed);
+        if (position_empty(&world->grid[i][j]))
         {
-            insert_animal(i, j, atype, board);
+            insert_animal(&world->grid[i][j], atype);
         }
     }
 }

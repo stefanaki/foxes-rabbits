@@ -1,19 +1,21 @@
-#include "worldstructs.h"
-#include "cell.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 #ifndef ANIMAL_LIB_H__
 #define ANIMAL_LIB_H__
 
-void insert_animal(int, int, enum ElementType, Board *);
+enum AnimalType { RABBIT, FOX };
 
+typedef struct Animal {
+  char type;
+  uint16_t age;
+  uint16_t breeding_age;
+  bool has_moved;
+} Animal;
 
-void die(Cell *);
-void eat(Animal *, Cell *);
-void move(int, int, Board *, int, int);
-void give_baby(int, int, Board *, int, int);
-
-bool check_life(Animal*);
-bool breeding_status(Animal*);
-Cell* find_space(int, int, Board *);
+bool check_life(Animal *);
+bool breeding_status(Animal *);
+// Cell *find_space(int, int, Board *);
+// This function will be in the coordinator functions not here
 
 #endif /* ANIMAL_LIB_H__ */
