@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #ifndef WORLDSTRUCTS_LIB_H__
 #define WORLDSTRUCTS_LIB_H__
@@ -20,6 +21,7 @@ enum AnimalType
 typedef struct Animal
 {
     enum AnimalType type;
+    uint16_t age;
     uint16_t breeding_age;
     uint16_t starvation_age; //null if type==Rabbit
     bool has_moved;

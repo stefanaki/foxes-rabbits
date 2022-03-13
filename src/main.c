@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     {
         for (int j = 0; j < N; j++)
         {
-            printf("%d\t", board.grid[i][j].element.type);
+            printf("%d\t", board.grid[i][j].type);
         }
         printf("\n");
     }
