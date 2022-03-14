@@ -3,12 +3,7 @@
 #include <stdlib.h>
 
 void insert_animal(Cell *cell, char atype) {
-  Animal* animal = malloc(sizeof(Animal));
-  animal->type = atype;
-  animal->starvation_age = 0;
-  animal->breeding_age = 0;
-  animal->has_moved = 0;
-
+  Animal* animal = create_animal(atype);
   modify_cell(cell, ANIMAL, animal);
 }
 

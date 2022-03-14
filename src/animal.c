@@ -15,6 +15,10 @@ void change_starvationAge(Animal *animal, int n_age) {
 
 void change_breedingAge(Animal *animal, int n_age) {
   animal->breeding_age=n_age;
+
+Animal* create_animal(char type){
+  Animal animal = {.type = type, .starvation_age=0, .breeding_age=0, .has_moved=false};
+  return &animal;
 }
 
 void reset_animal(Animal *animal) {
