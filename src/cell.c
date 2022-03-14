@@ -16,8 +16,7 @@ void insert_element(Cell *cell, char atype) {
   animal->starvation_age = 0;
   animal->has_moved = false;
 
-  cell->type = ANIMAL;
-  cell->animal = animal;
+  modify_cell(cell, ANIMAL, animal);
   cell->incoming_animal = NULL;
 }
 
