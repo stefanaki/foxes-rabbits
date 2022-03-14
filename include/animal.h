@@ -7,8 +7,8 @@
 enum AnimalType { RABBIT, FOX };
 
 typedef struct Animal {
-  enum AnimalType type;
-  uint16_t age;
+  char type;
+  uint16_t starvation_age;
   uint16_t breeding_age;
   bool has_moved;
 } Animal;

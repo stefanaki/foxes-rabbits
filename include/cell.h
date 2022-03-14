@@ -7,9 +7,9 @@ enum ElementType { EMPTY, ANIMAL, ROCK };
 
 typedef struct Cell {
   enum ElementType type;
-  Animal* animal;
-  bool modified;
-  Animal new_animals[4];
+  Animal *animal;
+  Animal *incoming_animal;
+  bool modified_by_red;
   uint32_t board_index;
 } Cell;
 
