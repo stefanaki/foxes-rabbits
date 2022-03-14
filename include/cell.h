@@ -6,7 +6,7 @@
 enum ElementType { EMPTY, ANIMAL, ROCK };
 
 typedef struct Cell {
-  enum ElementType type;
+  char type;
   Animal *animal;
   Animal *incoming_animal;
   bool modified_by_red;

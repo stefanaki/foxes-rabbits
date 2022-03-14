@@ -10,7 +10,7 @@ bool animal_type(Animal *animal, char atype) {
 }
 
 void change_starvationAge(Animal *animal, int n_age) {
-  animal->starvation_age=n_age;
+  if (animal_type(animal, FOX)) animal->starvation_age=n_age;
 }
 
 void change_breedingAge(Animal *animal, int n_age) {
@@ -33,7 +33,7 @@ void reset_animal(Animal *animal) {
 }
 
 bool starvation_status(Animal *animal) {
-  return animal->starvation_age == fox_starvation;
+  return animal_type(animal, FOX) && (animal->starvation_age == fox_starvation);
 }
 
 bool breeding_status(Animal *animal) {
