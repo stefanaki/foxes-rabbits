@@ -23,5 +23,5 @@ bool breeding_status(Animal *animal) {
 }
 
 bool check_life(Animal *animal) {
-  return (animal->type == FOX) && (animal->age == fox_starvation);
+  return (animal->type == FOX) && (animal->starvation_age == fox_starvation);
 }

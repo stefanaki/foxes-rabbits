@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include "world.h"
 #include "worldgen.h"
 #include "serial.h"
@@ -17,6 +18,7 @@ uint32_t seed;
 
 int main(int argc, char **argv)
 {
+    World world = (World){};
     // foxes-rabbits <# generations> <M> <N> <# rocks> <# rabbits>
     //  <rabbit breeding> <# foxes> <fox breeding> <fox starvation> <seed>
 
@@ -33,32 +35,18 @@ int main(int argc, char **argv)
     fox_starvation = atoi(argv[9]);
     seed = atoi(argv[10]);
 
-    World world = (World){ .row_size = M, .column_size = N };
-    world.grid = (Cell **)malloc(sizeof(Cell) * M);
-    
-    for (int i = 0; i < M; i++)
-    {
-        world.grid[i] = (Cell *)malloc(sizeof(Cell) * N);
-    }
-
-    for (int i = 0; i < M; ++i)
-        for (int j = 0; j < N; ++j)
-            world.grid[i][j].board_index = i * N + j;
-
-    generate_element(2, FOX, &seed, &world);
-    generate_element(3, RABBIT, &seed, &world);
-    generate_element(10, ROCK, &seed, &world);
+    init_world(&world);
 
     for (int i = 0; i < M; i++)
     {
         for (int j = 0; j < N; j++)
         {
-            printf("%d\t", world.grid[i][j].board_index);
+            printf("%d\t", world.grid[i][j].type);
         }
         printf("\n");
     }
 
-    serial_implementation(&world);
+    // serial_implementation(&world);
 
     return 0;
 }
