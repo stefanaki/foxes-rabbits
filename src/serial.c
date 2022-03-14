@@ -13,7 +13,7 @@ extern uint32_t fox_breeding;
 extern uint32_t fox_starvation;
 extern uint32_t seed;
 
-Cell *compute_next_position(World *world, int i, int j) {
+Cell *compute_next_position(World *world, int i, int j, char animal_type) {
   int C = i * N + j;
   int p = 0;
   int available_cells[4] =
@@ -22,19 +22,30 @@ Cell *compute_next_position(World *world, int i, int j) {
   if (i - 1 >= 0 && world->grid[i - 1][j].type == EMPTY) {
     ++p;
     available_cells[0] = true;
-  }
-  if (j + 1 >= N && world->grid[i][j + 1].type == EMPTY) {
+  } else if (i - 1 >= 0 && animal_type == FOX && world->grid[i - 1][j].animal &&
+             world->grid[i - 1][j].animal->type == RABBIT)
+    return world->grid[i - 1][j];
+
+  if (j + 1 < N && world->grid[i][j + 1].type == EMPTY) {
     ++p;
     available_cells[0] = true;
-  }
-  if (i + 1 <= M && world->grid[i + 1][j].type == EMPTY) {
+  } else if (j + 1 < N && animal_type == FOX && world->grid[i][j + 1].animal &&
+             world->grid[i][j + 1].animal->type == RABBIT)
+    return world->grid[i][j + 1];
+
+  if (i + 1 < M && world->grid[i + 1][j].type == EMPTY) {
     ++p;
     available_cells[1] = true;
-  }
+  } else if (i + 1 < M && animal_type == FOX && world->grid[i + 1][j].animal &&
+             world->grid[i + 1][j].animal->type == RABBIT)
+    return world->grid[i + 1][j];
+
   if (j - 1 >= 0 && world->grid[i][j - 1].type == EMPTY) {
     ++p;
     available_cells[2] = true;
-  }
+  } else if (j - 1 >= 0 && animal_type == FOX && world->grid[i][j - 1].animal &&
+             world->grid[i][j - 1].animal->type == RABBIT)
+    return world->grid[i][j - 1];
 
   int res = C % p, idx = 0;
   while (idx < res) {
@@ -64,15 +75,16 @@ void serial_implementation(World *world) {
       for (i = 0; i < M; ++i) {
         for (j = col_offset; j < N; j += 2) {
           initial_pos = &world->grid[i][j];
-          if (initial_pos->modified_by_red)
+          if (initial_pos->modified_by_red || !initial_pos->animal)
             continue;
 
           if (initial_pos->animal->type == FOX &&
               initial_pos->animal->starvation_age == fox_starvation) {
-            free(initial_pos->animal);
+            kill_animal(initial_pos);
           }
 
-          landing_pos = compute_next_position(world, i, j);
+          landing_pos =
+              compute_next_position(world, i, j, initial_pos->animal->type);
 
           if (landing_pos != NULL) {
             landing_pos->incoming_animal = initial_pos->animal;
