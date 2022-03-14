@@ -7,13 +7,13 @@ enum ElementType { EMPTY, ANIMAL, ROCK };
 
 typedef struct Cell {
   enum ElementType type;
-  Animal animal;
+  Animal* animal;
   bool modified;
   Animal new_animals[4];
   uint32_t board_index;
 } Cell;
 
-void modify_cell(Cell *, char, Animal, bool);
+void modify_cell(Cell *, char, Animal*, bool);
 void insert_animal(Cell *, char);
 void kill_animal(Cell *);
 void move_animal(Cell *, Cell *);

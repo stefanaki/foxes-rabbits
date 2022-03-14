@@ -4,19 +4,18 @@
 void insert_animal(Cell *cell, char atype) {
   Animal animal = {.type = atype, .breeding_age = 0, .has_moved = 0, .age = 0};
 
-  cell->type = ANIMAL;
-  cell->animal = animal;
-  // new_animals?
+  modify_cell(cell, ANIMAL, &animal, true);
 }
 
-void modify_cell(Cell *cell, char type, Animal animal, bool modified) {
+void modify_cell(Cell *cell, char type, Animal *animal, bool modified) {
   cell->type = type;
   cell->animal = animal;
   cell->modified = modified;
 }
 
 void kill_animal(Cell *cell) {
-  // TODO
+  free(cell->animal);
+  modify_cell(cell, EMPTY, NULL, true);
 }
 
 void move_animal(Cell *initial_cell, Cell *final_cell) {
@@ -25,12 +24,10 @@ void move_animal(Cell *initial_cell, Cell *final_cell) {
 
   modify_cell(final_cell, initial_cell->type, initial_cell->animal, true);
 
-  if (breeding_status(&initial_cell->animal)) {
-    insert_animal(initial_cell, initial_cell->type);
+  if (breeding_status(initial_cell->animal)) {
+    insert_animal(initial_cell, initial_cell->animal->type);
   } else {
-    Animal dummy_animal = {
-        .type = RABBIT, .breeding_age = 0, .has_moved = 0, .age = 0};
-    modify_cell(initial_cell, EMPTY, dummy_animal, true);
+    modify_cell(initial_cell, EMPTY, NULL, true);
   }
 }
 
