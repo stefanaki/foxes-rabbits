@@ -4,13 +4,15 @@
 void insert_animal(Cell *cell, char atype) {
   Animal animal = {.type = atype, .breeding_age = 0, .has_moved = 0, .age = 0};
 
-  modify_cell(cell, ANIMAL, &animal, true);
+  cell->type = ANIMAL;
+  cell->animal = animal;
+  cell->incoming_animal = NULL;
 }
 
 void modify_cell(Cell *cell, char type, Animal *animal, bool modified) {
   cell->type = type;
   cell->animal = animal;
-  cell->modified = modified;
+  cell->modified_by_red = modified;
 }
 
 void kill_animal(Cell *cell) {
@@ -33,4 +35,4 @@ void move_animal(Cell *initial_cell, Cell *final_cell) {
 
 bool position_empty(Cell *cell) { return cell->type == EMPTY; }
 
-bool position_processed(Cell *cell) { return cell->modified; }
+bool position_processed(Cell *cell) { return cell->modified_by_red; }

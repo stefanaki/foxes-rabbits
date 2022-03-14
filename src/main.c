@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "world.h"
 #include "worldgen.h"
+#include "serial.h"
 
 uint32_t generations;
 uint32_t M;
@@ -56,6 +57,8 @@ int main(int argc, char **argv)
         }
         printf("\n");
     }
+
+    serial_implementation(&world);
 
     return 0;
 }
