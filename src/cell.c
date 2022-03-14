@@ -1,8 +1,19 @@
 #include "cell.h"
+#include <stdlib.h>
 #include <stddef.h>
 
-void insert_animal(Cell *cell, char atype) {
-  Animal animal = {.type = atype, .breeding_age = 0, .has_moved = 0, .age = 0};
+void insert_element(Cell *cell, char atype) {
+  if (atype == ROCK) {
+    cell->type = ROCK;
+    return;
+  }
+
+  Animal *animal = (Animal *)malloc(sizeof(Animal));
+
+  animal->type = atype;
+  animal->breeding_age = 0;
+  animal->starvation_age = 0;
+  animal->has_moved = false;
 
   cell->type = ANIMAL;
   cell->animal = animal;
@@ -27,7 +38,7 @@ void move_animal(Cell *initial_cell, Cell *final_cell) {
   modify_cell(final_cell, initial_cell->type, initial_cell->animal, true);
 
   if (breeding_status(initial_cell->animal)) {
-    insert_animal(initial_cell, initial_cell->animal->type);
+    insert_element(initial_cell, initial_cell->animal->type);
   } else {
     modify_cell(initial_cell, EMPTY, NULL, true);
   }
