@@ -13,39 +13,47 @@ extern uint32_t fox_breeding;
 extern uint32_t fox_starvation;
 extern uint32_t seed;
 
-Cell *compute_next_position(World *world, int i, int j, char animal_type) {
+Cell *compute_next_position(World *world, int i, int j, char animal_type)
+{
   int C = i * N + j;
   int p = 0;
   int available_cells[4] =
-      { false, false, false, false }; // top, right, bottom, left
+      {false, false, false, false}; // top, right, bottom, left
 
   if (i - 1 >= 0 && world->grid[i - 1][j].type == EMPTY)
   {
     ++p;
     available_cells[0] = true;
-  } else if (i - 1 >= 0 && animal_type == FOX && world->grid[i - 1][j].animal &&
-             world->grid[i - 1][j].animal->type == RABBIT)
+  }
+  else if (i - 1 >= 0 && animal_type == FOX && world->grid[i - 1][j].animal &&
+           world->grid[i - 1][j].animal->type == RABBIT)
     return &world->grid[i - 1][j];
 
-  if (j + 1 < N && world->grid[i][j + 1].type == EMPTY) {
-    ++p;
-    available_cells[0] = true;
-  } else if (j + 1 < N && animal_type == FOX && world->grid[i][j + 1].animal &&
-             world->grid[i][j + 1].animal->type == RABBIT)
-    return &world->grid[i][j + 1];
-
-  if (i + 1 < M && world->grid[i + 1][j].type == EMPTY) {
+  if (j + 1 < N && world->grid[i][j + 1].type == EMPTY)
+  {
     ++p;
     available_cells[1] = true;
-  } else if (i + 1 < M && animal_type == FOX && world->grid[i + 1][j].animal &&
-             world->grid[i + 1][j].animal->type == RABBIT)
-    return &world->grid[i + 1][j];
+  }
+  else if (j + 1 < N && animal_type == FOX && world->grid[i][j + 1].animal &&
+           world->grid[i][j + 1].animal->type == RABBIT)
+    return &world->grid[i][j + 1];
 
-  if (j - 1 >= 0 && world->grid[i][j - 1].type == EMPTY) {
+  if (i + 1 < M && world->grid[i + 1][j].type == EMPTY)
+  {
     ++p;
     available_cells[2] = true;
-  } else if (j - 1 >= 0 && animal_type == FOX && world->grid[i][j - 1].animal &&
-             world->grid[i][j - 1].animal->type == RABBIT)
+  }
+  else if (i + 1 < M && animal_type == FOX && world->grid[i + 1][j].animal &&
+           world->grid[i + 1][j].animal->type == RABBIT)
+    return &world->grid[i + 1][j];
+
+  if (j - 1 >= 0 && world->grid[i][j - 1].type == EMPTY)
+  {
+    ++p;
+    available_cells[3] = true;
+  }
+  else if (j - 1 >= 0 && animal_type == FOX && world->grid[i][j - 1].animal &&
+           world->grid[i][j - 1].animal->type == RABBIT)
     return &world->grid[i][j - 1];
 
   int res = C % p, idx = 0;
@@ -86,7 +94,8 @@ void serial_implementation(World *world)
             continue;
 
           if (initial_pos->animal->type == FOX &&
-              initial_pos->animal->starvation_age == fox_starvation) {
+              initial_pos->animal->starvation_age == fox_starvation)
+          {
             kill_animal(initial_pos);
             continue;
           }
@@ -100,12 +109,15 @@ void serial_implementation(World *world)
             initial_pos->modified_by_red = true;
 
             if (landing_pos->animal->type == RABBIT &&
-                landing_pos->animal->breeding_age >= rabbit_breeding) {
-              insert_animal(initial_pos, RABBIT);
+                landing_pos->animal->breeding_age >= rabbit_breeding)
+            {
+              insert_element(initial_pos, RABBIT);
               landing_pos->animal->breeding_age = 0;
-            } else if (landing_pos->animal->type == FOX &&
-                       landing_pos->animal->breeding_age >= fox_breeding) {
-              insert_animal(initial_pos, FOX);
+            }
+            else if (landing_pos->animal->type == FOX &&
+                     landing_pos->animal->breeding_age >= fox_breeding)
+            {
+              insert_element(initial_pos, FOX);
               change_breedingAge(landing_pos->animal, 0);
             }
             else
