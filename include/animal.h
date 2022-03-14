@@ -13,6 +13,7 @@ typedef struct Animal {
   bool has_moved;
 } Animal;
 
+Animal* create_animal(char);
 bool check_life(Animal *);
 bool breeding_status(Animal *);
 // Cell *find_space(int, int, Board *);

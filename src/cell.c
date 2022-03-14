@@ -1,12 +1,10 @@
 #include "cell.h"
 #include <stddef.h>
+#include <stdlib.h>
 
 void insert_animal(Cell *cell, char atype) {
-  Animal animal = {.type = atype, .breeding_age = 0, .has_moved = 0, .age = 0};
-
-  cell->type = ANIMAL;
-  cell->animal = animal;
-  cell->incoming_animal = NULL;
+  Animal* animal = create_animal(atype);
+  modify_cell(cell, ANIMAL, animal, true);
 }
 
 void modify_cell(Cell *cell, char type, Animal *animal, bool modified) {

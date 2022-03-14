@@ -5,6 +5,11 @@ extern uint32_t fox_breeding;
 extern uint32_t fox_starvation;
 extern uint32_t rabbit_breeding;
 
+Animal* create_animal(char type){
+  Animal animal = {.type = type, .starvation_age=0, .breeding_age=0, .has_moved=false};
+  return &animal;
+}
+
 void change_age(Animal *animal, int n_age) {
   animal->age=n_age;
 }
