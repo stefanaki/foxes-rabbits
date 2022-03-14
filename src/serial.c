@@ -81,6 +81,7 @@ void serial_implementation(World *world) {
           if (initial_pos->animal->type == FOX &&
               initial_pos->animal->starvation_age == fox_starvation) {
             kill_animal(initial_pos);
+            continue;
           }
 
           landing_pos =
