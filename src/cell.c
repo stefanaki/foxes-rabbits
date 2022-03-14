@@ -5,17 +5,11 @@
 
 void insert_element(Cell *cell, char atype) {
   if (atype == ROCK) {
-    cell->type = ROCK;
+    modify_cell(cell, ROCK, NULL);
     return;
   }
 
-  Animal *animal = (Animal *)malloc(sizeof(Animal));
-
-  animal->type = atype;
-  animal->breeding_age = 0;
-  animal->starvation_age = 0;
-  animal->has_moved = false;
-
+  Animal* animal = create_animal(atype);
   modify_cell(cell, ANIMAL, animal);
   cell->incoming_animal = NULL;
 }
