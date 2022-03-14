@@ -19,7 +19,8 @@ Cell *compute_next_position(World *world, int i, int j, char animal_type) {
   int available_cells[4] =
       { false, false, false, false }; // top, right, bottom, left
 
-  if (i - 1 >= 0 && world->grid[i - 1][j].type == EMPTY) {
+  if (i - 1 >= 0 && world->grid[i - 1][j].type == EMPTY)
+  {
     ++p;
     available_cells[0] = true;
   } else if (i - 1 >= 0 && animal_type == FOX && world->grid[i - 1][j].animal &&
@@ -48,7 +49,8 @@ Cell *compute_next_position(World *world, int i, int j, char animal_type) {
     return &world->grid[i][j - 1];
 
   int res = C % p, idx = 0;
-  while (idx < res) {
+  while (idx < res)
+  {
     if (!available_cells[idx])
       ++idx;
   }
@@ -65,15 +67,20 @@ Cell *compute_next_position(World *world, int i, int j, char animal_type) {
 
 void resolve_conflicts(Cell *c_1, Cell *c_2) {}
 
-void serial_implementation(World *world) {
+void serial_implementation(World *world)
+{
   int i, j, gen, turn, col_offset;
   Cell *initial_pos, *landing_pos;
 
-  for (gen = 0; gen < generations; ++gen) {
-    for (turn = 0; turn < 2; ++turn) {
+  for (gen = 0; gen < generations; ++gen)
+  {
+    for (turn = 0; turn < 2; ++turn)
+    {
       col_offset = turn;
-      for (i = 0; i < M; ++i) {
-        for (j = col_offset; j < N; j += 2) {
+      for (i = 0; i < M; ++i)
+      {
+        for (j = col_offset; j < N; j += 2)
+        {
           initial_pos = &world->grid[i][j];
           if (initial_pos->modified_by_red || !initial_pos->animal)
             continue;
@@ -87,7 +94,8 @@ void serial_implementation(World *world) {
           landing_pos =
               compute_next_position(world, i, j, initial_pos->animal->type);
 
-          if (landing_pos != NULL) {
+          if (landing_pos != NULL)
+          {
             landing_pos->incoming_animal = initial_pos->animal;
             initial_pos->modified_by_red = true;
 
@@ -98,15 +106,20 @@ void serial_implementation(World *world) {
             } else if (landing_pos->animal->type == FOX &&
                        landing_pos->animal->breeding_age >= fox_breeding) {
               insert_animal(initial_pos, FOX);
-              landing_pos->animal->breeding_age = 0;
-            } else { // Animal moves to neighbouring cell but does not breed
+              change_breedingAge(landing_pos->animal, 0);
+            }
+            else
+            { // Animal moves to neighbouring cell but does not breed
+              // move_cell
               initial_pos->animal = NULL;
               landing_pos->animal->breeding_age++;
             }
-          } else { // Animal stays in current cell
+          }
+          else
+          { // Animal stays in current cell
             initial_pos->animal->breeding_age++;
           }
-          if (landing_pos->incoming_animal->type == FOX)
+          if (animal_type(landing_pos->incoming_animal, FOX))
             landing_pos->incoming_animal->starvation_age++;
         }
         col_offset = col_offset == 0 ? 1 : 0;

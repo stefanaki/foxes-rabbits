@@ -2,6 +2,7 @@
 #define SERIAL_LIB_H__
 
 #include "world.h"
+#include <stdlib.h>
 
 Cell *compute_next_position(World *, int, int);
 void resolve_conflicts(Cell *, Cell *);

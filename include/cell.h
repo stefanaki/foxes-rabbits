@@ -13,8 +13,8 @@ typedef struct Cell {
   uint32_t board_index;
 } Cell;
 
-void modify_cell(Cell *, char, Animal*, bool);
 void insert_animal(Cell *, char);
+void modify_cell(Cell *, char, Animal*);
 void kill_animal(Cell *);
 void move_animal(Cell *, Cell *);
 void breed(Cell *, Animal *);
