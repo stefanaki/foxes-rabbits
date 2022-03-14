@@ -28,21 +28,21 @@ Cell *compute_next_position(World *world, int i, int j, char animal_type) {
 
   if (j + 1 < N && world->grid[i][j + 1].type == EMPTY) {
     ++p;
-    available_cells[0] = true;
+    available_cells[1] = true;
   } else if (j + 1 < N && animal_type == FOX && world->grid[i][j + 1].animal &&
              world->grid[i][j + 1].animal->type == RABBIT)
     return &world->grid[i][j + 1];
 
   if (i + 1 < M && world->grid[i + 1][j].type == EMPTY) {
     ++p;
-    available_cells[1] = true;
+    available_cells[2] = true;
   } else if (i + 1 < M && animal_type == FOX && world->grid[i + 1][j].animal &&
              world->grid[i + 1][j].animal->type == RABBIT)
     return &world->grid[i + 1][j];
 
   if (j - 1 >= 0 && world->grid[i][j - 1].type == EMPTY) {
     ++p;
-    available_cells[2] = true;
+    available_cells[3] = true;
   } else if (j - 1 >= 0 && animal_type == FOX && world->grid[i][j - 1].animal &&
              world->grid[i][j - 1].animal->type == RABBIT)
     return &world->grid[i][j - 1];
@@ -93,11 +93,11 @@ void serial_implementation(World *world) {
 
             if (landing_pos->animal->type == RABBIT &&
                 landing_pos->animal->breeding_age >= rabbit_breeding) {
-              insert_animal(initial_pos, RABBIT);
+              insert_element(initial_pos, RABBIT);
               landing_pos->animal->breeding_age = 0;
             } else if (landing_pos->animal->type == FOX &&
                        landing_pos->animal->breeding_age >= fox_breeding) {
-              insert_animal(initial_pos, FOX);
+              insert_element(initial_pos, FOX);
               landing_pos->animal->breeding_age = 0;
             } else { // Animal moves to neighbouring cell but does not breed
               initial_pos->animal = NULL;

@@ -14,7 +14,7 @@ typedef struct Cell {
 } Cell;
 
 void modify_cell(Cell *, char, Animal*, bool);
-void insert_animal(Cell *, char);
+void insert_element(Cell *, char);
 void kill_animal(Cell *);
 void move_animal(Cell *, Cell *);
 void breed(Cell *, Animal *);
