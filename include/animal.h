@@ -17,11 +17,10 @@ typedef struct Animal {
 Animal* create_animal(char);
 void reset_animal(Animal*);
 bool check_life(Animal *);
-void change_breedingAge(Animal *, int);
+void change_breeding_age(Animal *, int);
+void change_starvation_age(Animal *, int);
 bool starvation_status(Animal *);
 bool breeding_status(Animal *);
 bool animal_type(Animal*, char);
-// Cell *find_space(int, int, Board *);
-// This function will be in the coordinator functions not here
 
 #endif /* ANIMAL_LIB_H__ */

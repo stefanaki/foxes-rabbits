@@ -46,7 +46,7 @@ int main(int argc, char **argv)
         printf("\n");
     }
 
-    // serial_implementation(&world);
+    serial_implementation(&world);
 
     return 0;
 }
