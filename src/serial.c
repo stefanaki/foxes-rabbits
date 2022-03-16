@@ -69,9 +69,11 @@ Cell *compute_next_position(World *world, int i, int j, char animal_type)
   }
 
   if (p == 0 && rabbit_p == 0)
+  {
     return NULL;
+  }
 
-  int n = p > rabbit_p ? p : rabbit_p;
+  int n = rabbit_p > 0 ? rabbit_p : p;
 
   int res = C % n;
 
@@ -156,10 +158,8 @@ void resolve_conflicts(Cell *cell, int turn)
         {
           // Animal on cell is RABBIT and incoming animal is
           // FOX = FOX eats RABBIT
-
           cell->animal = incoming;
           incoming->starvation_age = 0;
-          cell->type = ANIMAL;
         }
         else
         {
@@ -169,12 +169,21 @@ void resolve_conflicts(Cell *cell, int turn)
           {
             incoming = NULL;
           }
-          else if (incoming->breeding_age > cell->animal->breeding_age)
+          else
           {
             cell->animal = incoming;
           }
         }
       }
+    }
+  }
+
+  if (cell->animal)
+  {
+    // check for death
+    if (starvation_status(cell->animal))
+    {
+      kill_animal(cell);
     }
   }
 
@@ -214,26 +223,21 @@ void serial_implementation(World *world)
           }
 
           // mark animal as modified
-          initial_pos->animal->modified_by_red = true;
-
-          // increase ages
-          initial_pos->animal->breeding_age++;
-          initial_pos->animal->starvation_age++;
-
-          // check for death
-          if (starvation_status(initial_pos->animal))
+          if (turn == 0)
           {
-            kill_animal(initial_pos);
-            continue;
+            initial_pos->animal->modified_by_red = true;
           }
 
           landing_pos =
               compute_next_position(world, i, j, initial_pos->animal->type);
 
+          // increase ages
+          initial_pos->animal->breeding_age++;
+          initial_pos->animal->starvation_age++;
+
           // move animal
           if (landing_pos != NULL)
           {
-
             if (initial_pos->animal->type == FOX && initial_pos->animal->breeding_age >= fox_breeding)
             {
               initial_pos->incoming_animals[initial_pos->new_animals++] = create_animal(FOX);
@@ -273,7 +277,7 @@ void serial_implementation(World *world)
         {
           if (world->grid[k][l].type == ANIMAL &&
               world->grid[k][l].animal->type == FOX)
-            printf("F\t");
+            printf("F %d %d\t", world->grid[k][l].animal->starvation_age, world->grid[k][l].animal->breeding_age);
           else if (world->grid[k][l].type == ANIMAL && world->grid[k][l].animal->type == RABBIT)
             printf("R\t");
           else if (world->grid[k][l].type == ROCK)

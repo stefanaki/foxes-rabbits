@@ -58,5 +58,32 @@ int main(int argc, char **argv)
 
     serial_implementation(&world);
 
+    // count rocks, rabbits and foxes
+    int rocks = 0, rabbits = 0, foxes = 0;
+    for (int k = 0; k < M; k++)
+    {
+        for (int l = 0; l < N; l++)
+        {
+            if (world.grid[k][l].type == EMPTY)
+            {
+                continue;
+            }
+            else if (world.grid[k][l].type == ROCK)
+            {
+                rocks++;
+            }
+            else if (world.grid[k][l].animal->type == FOX)
+            {
+                foxes++;
+            }
+            else
+            {
+                rabbits++;
+            }
+        }
+    }
+
+    printf("%d %d %d\n", rocks, rabbits, foxes);
+
     return 0;
 }
