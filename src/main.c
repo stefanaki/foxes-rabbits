@@ -38,7 +38,7 @@ int main(int argc, char **argv)
     init_world(&world);
 
     // Printing board
-    printf("===========\nGen %d, Subgen %d\n", -1, -1);
+    printf("===========\nGen %d, Subgen %s\n", 0, "red");
     for (int k = 0; k < M; k++)
     {
         for (int l = 0; l < N; l++)

@@ -24,45 +24,66 @@ Cell *compute_next_position(World *world, int i, int j, char animal_type)
 {
   int C = i * N + j;
   int p = 0;
-  Cell *available_cells[4]; // top, right, bottom, left
+  int rabbit_p = 0;
+  Cell *available_cells[4];        // top, right, bottom, left
+  Cell *available_rabbit_cells[4]; // top, right, bottom, left
 
+  // top
   if (i - 1 >= 0 && world->grid[i - 1][j].type == EMPTY)
   {
     available_cells[p++] = &world->grid[i - 1][j];
   }
   if (i - 1 >= 0 && fox_sees_rabbit(&world->grid[i - 1][j], animal_type))
-    return &world->grid[i - 1][j];
+  {
+    available_rabbit_cells[rabbit_p++] = &world->grid[i - 1][j];
+  }
 
+  // right
   if (j + 1 < N && world->grid[i][j + 1].type == EMPTY)
   {
     available_cells[p++] = &world->grid[i][j + 1];
   }
   if (j + 1 < N && fox_sees_rabbit(&world->grid[i][j + 1], animal_type))
-    return &world->grid[i][j + 1];
+  {
+    available_rabbit_cells[rabbit_p++] = &world->grid[i][j + 1];
+  }
 
+  // bottom
   if (i + 1 < M && world->grid[i + 1][j].type == EMPTY)
   {
     available_cells[p++] = &world->grid[i + 1][j];
   }
   if (i + 1 < M && fox_sees_rabbit(&world->grid[i + 1][j], animal_type))
-    return &world->grid[i + 1][j];
+  {
+    available_rabbit_cells[rabbit_p++] = &world->grid[i + 1][j];
+  }
 
+  // left
   if (j - 1 >= 0 && world->grid[i][j - 1].type == EMPTY)
   {
     available_cells[p++] = &world->grid[i][j - 1];
   }
   if (j - 1 >= 0 && fox_sees_rabbit(&world->grid[i][j - 1], animal_type))
-    return &world->grid[i][j - 1];
+  {
+    available_rabbit_cells[rabbit_p++] = &world->grid[i][j - 1];
+  }
 
-  if (p == 0)
+  if (p == 0 && rabbit_p == 0)
     return NULL;
 
-  int res = C % p;
+  int n = p > rabbit_p ? p : rabbit_p;
+
+  int res = C % n;
+
+  if (rabbit_p > 0)
+  {
+    return available_rabbit_cells[res];
+  }
 
   return available_cells[res];
 }
 
-void resolve_conflicts(Cell *cell, int gen)
+void resolve_conflicts(Cell *cell, int turn)
 {
 
   // Function that resolves conflicts that might appear on a cell
@@ -157,8 +178,8 @@ void resolve_conflicts(Cell *cell, int gen)
     }
   }
 
-  // reset generation
-  if (cell->animal && gen == 1)
+  // reset turn
+  if (cell->animal && turn == 1)
   {
     cell->animal->modified_by_red = false;
   }
@@ -186,7 +207,7 @@ void serial_implementation(World *world)
           if (initial_pos->type != ANIMAL)
             continue;
 
-          if (initial_pos->animal->modified_by_red)
+          if (initial_pos->animal->modified_by_red && turn == 1)
           {
             initial_pos->animal->modified_by_red = false;
             continue;
@@ -212,7 +233,6 @@ void serial_implementation(World *world)
           // move animal
           if (landing_pos != NULL)
           {
-            landing_pos->incoming_animals[landing_pos->new_animals++] = initial_pos->animal;
 
             if (initial_pos->animal->type == FOX && initial_pos->animal->breeding_age >= fox_breeding)
             {
@@ -224,6 +244,9 @@ void serial_implementation(World *world)
               initial_pos->incoming_animals[initial_pos->new_animals++] = create_animal(RABBIT);
               initial_pos->animal->breeding_age = 0;
             }
+
+            landing_pos->incoming_animals[landing_pos->new_animals++] = initial_pos->animal;
+
             initial_pos->type = EMPTY;
             initial_pos->animal = NULL;
           }
@@ -237,13 +260,13 @@ void serial_implementation(World *world)
         {
           if (world->grid[k][l].type != ROCK)
           {
-            resolve_conflicts(&world->grid[k][l], gen);
+            resolve_conflicts(&world->grid[k][l], turn);
           }
         }
       }
 
       // Printing board
-      printf("===========\nGen %d, Subgen %d\n", gen, turn);
+      printf("===========\nGen %d, Subgen %s\n", gen + 1, turn == 0 ? "red" : "black");
       for (int k = 0; k < M; k++)
       {
         for (int l = 0; l < N; l++)
