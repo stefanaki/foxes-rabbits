@@ -37,11 +37,21 @@ int main(int argc, char **argv)
 
     init_world(&world);
 
-    for (int i = 0; i < M; i++)
+    // Printing board
+    printf("===========\nGen %d, Subgen %d\n", -1, -1);
+    for (int k = 0; k < M; k++)
     {
-        for (int j = 0; j < N; j++)
+        for (int l = 0; l < N; l++)
         {
-            printf("%d\t", world.grid[i][j].type);
+            if (world.grid[k][l].type == ANIMAL &&
+                world.grid[k][l].animal->type == FOX)
+                printf("F\t");
+            else if (world.grid[k][l].type == ANIMAL && world.grid[k][l].animal->type == RABBIT)
+                printf("R\t");
+            else if (world.grid[k][l].type == ROCK)
+                printf("*\t");
+            else
+                printf("-\t");
         }
         printf("\n");
     }

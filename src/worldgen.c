@@ -13,7 +13,8 @@ extern uint32_t n_rabbits;
 extern uint32_t n_foxes;
 extern uint32_t seed;
 
-float r4_uni(uint32_t *seed) {
+float r4_uni(uint32_t *seed)
+{
   int seed_input, sseed;
   float r;
 
@@ -27,37 +28,43 @@ float r4_uni(uint32_t *seed) {
   return r;
 }
 
-void generate_element(int n, char atype, uint32_t *seed, World *world) {
+void generate_element(int n, char atype, uint32_t *seed, World *world)
+{
   int i, j, k;
 
-  for (k = 0; k < n; k++) {
+  for (k = 0; k < n; k++)
+  {
     i = world->row_size * r4_uni(seed);
     j = world->column_size * r4_uni(seed);
-    if (position_empty(&world->grid[i][j])) {
+    if (position_empty(&world->grid[i][j]))
+    {
       insert_element(&world->grid[i][j], atype);
     }
   }
 }
 
-void init_world(World *world) {
+void init_world(World *world)
+{
   world->row_size = M;
   world->column_size = N;
   world->grid = (Cell **)malloc(sizeof(Cell) * M);
 
-  for (int i = 0; i < M; ++i) {
+  for (int i = 0; i < M; ++i)
+  {
     world->grid[i] = (Cell *)malloc(sizeof(Cell) * N);
   }
 
-  for (int i = 0; i < M; ++i) {
-    for (int j = 0; j < N; ++j) {
+  for (int i = 0; i < M; ++i)
+  {
+    for (int j = 0; j < N; ++j)
+    {
       world->grid[i][j].type = EMPTY;
       world->grid[i][j].animal = NULL;
       world->grid[i][j].board_index = i * N + j;
       world->grid[i][j].modified_by_red = false;
     }
   }
-
-  generate_element(n_foxes, ROCK, &seed, world);
+  generate_element(n_rocks, ROCK, &seed, world);
   generate_element(n_rabbits, RABBIT, &seed, world);
-  generate_element(n_rocks, FOX, &seed, world);
+  generate_element(n_foxes, FOX, &seed, world);
 }
