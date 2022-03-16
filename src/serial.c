@@ -2,6 +2,7 @@
 #include "world.h"
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 
 extern uint32_t generations;
 extern uint32_t M;
@@ -61,102 +62,109 @@ Cell *compute_next_position(World *world, int i, int j, char animal_type)
   return available_cells[res];
 }
 
-void resolve_conflicts(Cell *cell)
+void resolve_conflicts(Cell *cell, int gen)
 {
-  // Function that resolves conflicts that might appear on a cell
-  Animal *current, *incoming;
 
-  if (cell->type == EMPTY && cell->incoming_animal != NULL)
+  // Function that resolves conflicts that might appear on a cell
+  Animal *incoming;
+  if (cell->new_animals == 0)
   {
-    cell->animal = cell->incoming_animal;
-    cell->type = ANIMAL;
-    cell->incoming_animal = NULL;
+    cell->type = cell->animal ? ANIMAL : EMPTY;
     return;
   }
 
-  current = cell->animal;
-  incoming = cell->incoming_animal;
-
-  if (incoming != NULL)
+  for (int i = 0; i < cell->new_animals; i++)
   {
-    if (current->type == FOX)
+    incoming = cell->incoming_animals[i];
+    if (cell->animal == NULL)
     {
-      if (incoming->type == RABBIT)
+      cell->animal = incoming;
+      cell->type = ANIMAL;
+      continue;
+    }
+
+    if (incoming != NULL)
+    {
+      if (cell->animal->type == FOX)
       {
-        // Animal on cell is FOX and incoming animal is RABBIT = FOX eats RABBIT
-        // Update: I think this will never happen
-        kill_animal(cell);
-        cell->animal = incoming;
-        incoming->starvation_age = 0;
-      }
-      else
-      {
-        // Animal on cell is FOX and incoming animal is
-        // FOX = FOX with largest starvation age survives
-        if (current->starvation_age > incoming->starvation_age)
+        if (incoming->type == RABBIT)
         {
-          incoming = NULL;
-          current->starvation_age = 0;
-        }
-        else if (incoming->starvation_age > current->starvation_age)
-        {
-          kill_animal(cell);
-          cell->animal = incoming;
-          incoming->starvation_age = 0;
+          // Animal on cell is FOX and incoming animal is RABBIT = FOX eats RABBIT
+          // Update: I think this will never happen
+          cell->animal->starvation_age = 0;
         }
         else
         {
-          // Check for the largest breeding age
-          if (current->breeding_age > incoming->breeding_age)
+          // Animal on cell is FOX and incoming animal is
+          // FOX = FOX with largest starvation age survives
+          if (cell->animal->starvation_age > incoming->starvation_age)
           {
             incoming = NULL;
-            current->starvation_age = 0;
+            cell->animal->starvation_age = 0;
           }
-          else if (incoming->breeding_age > current->breeding_age)
+          else if (incoming->starvation_age > cell->animal->starvation_age)
           {
-            kill_animal(cell);
             cell->animal = incoming;
             incoming->starvation_age = 0;
           }
           else
           {
-            // Both foxes die
-            kill_animal(cell);
-            incoming = NULL;
-            cell->type = EMPTY;
+            // Check for the largest breeding age
+            if (cell->animal->breeding_age > incoming->breeding_age)
+            {
+              incoming = NULL;
+              cell->animal->starvation_age = 0;
+            }
+            else if (incoming->breeding_age > cell->animal->breeding_age)
+            {
+              cell->animal = incoming;
+              incoming->starvation_age = 0;
+            }
+            else
+            {
+              // Both foxes die
+              incoming = NULL;
+              cell->type = EMPTY;
+            }
           }
         }
       }
-    }
-    else
-    {
-      if (incoming->type == FOX)
-      {
-        // Animal on cell is RABBIT and incoming animal is
-        // FOX = FOX eats RABBIT
-        kill_animal(cell);
-        cell->animal = incoming;
-        incoming->starvation_age = 0;
-        cell->type = ANIMAL;
-      }
       else
       {
-        // Animal on cell is RABBIT and incoming animal is
-        // RABBIT = RABBIT with largest breeding age survives
-        if (current->breeding_age >= incoming->breeding_age)
+        if (incoming->type == FOX)
         {
-          incoming = NULL;
-        }
-        else if (incoming->breeding_age > current->breeding_age)
-        {
-          kill_animal(cell);
+          // Animal on cell is RABBIT and incoming animal is
+          // FOX = FOX eats RABBIT
+
           cell->animal = incoming;
+          incoming->starvation_age = 0;
+          cell->type = ANIMAL;
+        }
+        else
+        {
+          // Animal on cell is RABBIT and incoming animal is
+          // RABBIT = RABBIT with largest breeding age survives
+          if (cell->animal->breeding_age >= incoming->breeding_age)
+          {
+            incoming = NULL;
+          }
+          else if (incoming->breeding_age > cell->animal->breeding_age)
+          {
+            cell->animal = incoming;
+          }
         }
       }
     }
   }
 
-  cell->incoming_animal = NULL;
+  // reset generation
+  if (cell->animal && gen == 1)
+  {
+    cell->animal->modified_by_red = false;
+  }
+
+  // reset new animal array
+  cell->new_animals = 0;
 }
 
 void serial_implementation(World *world)
@@ -178,12 +186,20 @@ void serial_implementation(World *world)
           if (initial_pos->type != ANIMAL)
             continue;
 
-          if (initial_pos->modified_by_red || !initial_pos->animal)
+          if (initial_pos->animal->modified_by_red)
           {
-            initial_pos->modified_by_red = false;
+            initial_pos->animal->modified_by_red = false;
             continue;
           }
 
+          // mark animal as modified
+          initial_pos->animal->modified_by_red = true;
+
+          // increase ages
+          initial_pos->animal->breeding_age++;
+          initial_pos->animal->starvation_age++;
+
+          // check for death
           if (starvation_status(initial_pos->animal))
           {
             kill_animal(initial_pos);
@@ -193,27 +209,37 @@ void serial_implementation(World *world)
           landing_pos =
               compute_next_position(world, i, j, initial_pos->animal->type);
 
+          // move animal
           if (landing_pos != NULL)
           {
-            landing_pos->incoming_animal = initial_pos->animal;
-            initial_pos->modified_by_red = true;
+            landing_pos->incoming_animals[landing_pos->new_animals++] = initial_pos->animal;
 
-            // move_animal(initial_pos, landing_pos); // why???
+            if (initial_pos->animal->type == FOX && initial_pos->animal->breeding_age >= fox_breeding)
+            {
+              initial_pos->incoming_animals[initial_pos->new_animals++] = create_animal(FOX);
+              initial_pos->animal->breeding_age = 0;
+            }
+            else if (initial_pos->animal->type == RABBIT && initial_pos->animal->breeding_age >= rabbit_breeding)
+            {
+              initial_pos->incoming_animals[initial_pos->new_animals++] = create_animal(RABBIT);
+              initial_pos->animal->breeding_age = 0;
+            }
             initial_pos->type = EMPTY;
             initial_pos->animal = NULL;
           }
-          else
-          { // Animal stays in current cell
-            initial_pos->animal->breeding_age++;
-          }
-
-          if (landing_pos && animal_type(landing_pos->incoming_animal, FOX))
-            landing_pos->incoming_animal->starvation_age++;
-
-          // resolve_conflicts(initial_pos);
-          resolve_conflicts(landing_pos);
         }
         col_offset = col_offset == 0 ? 1 : 0;
+      }
+
+      for (int k = 0; k < M; k++)
+      {
+        for (int l = 0; l < N; l++)
+        {
+          if (world->grid[k][l].type != ROCK)
+          {
+            resolve_conflicts(&world->grid[k][l], gen);
+          }
+        }
       }
 
       // Printing board

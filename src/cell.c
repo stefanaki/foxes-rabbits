@@ -13,7 +13,6 @@ void insert_element(Cell *cell, char atype)
 
   Animal *animal = create_animal(atype);
   modify_cell(cell, ANIMAL, animal);
-  cell->incoming_animal = NULL;
 }
 
 void modify_cell(Cell *cell, char type, Animal *animal)
@@ -52,5 +51,3 @@ void move_animal(Cell *initial_cell, Cell *final_cell)
 }
 
 bool position_empty(Cell *cell) { return cell->type == EMPTY; }
-
-bool position_processed(Cell *cell) { return cell->modified_by_red; }

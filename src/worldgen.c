@@ -61,7 +61,6 @@ void init_world(World *world)
       world->grid[i][j].type = EMPTY;
       world->grid[i][j].animal = NULL;
       world->grid[i][j].board_index = i * N + j;
-      world->grid[i][j].modified_by_red = false;
     }
   }
   generate_element(n_rocks, ROCK, &seed, world);

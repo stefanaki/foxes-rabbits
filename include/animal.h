@@ -5,22 +5,27 @@
 #ifndef ANIMAL_LIB_H__
 #define ANIMAL_LIB_H__
 
-enum AnimalType { RABBIT, FOX };
+enum AnimalType
+{
+  RABBIT,
+  FOX
+};
 
-typedef struct Animal {
+typedef struct Animal
+{
   char type;
   uint16_t starvation_age;
   uint16_t breeding_age;
-  bool has_moved;
+  bool modified_by_red;
 } Animal;
 
-Animal* create_animal(char);
-void reset_animal(Animal*);
+Animal *create_animal(char);
+void reset_animal(Animal *);
 bool check_life(Animal *);
 void change_breeding_age(Animal *, int);
 void change_starvation_age(Animal *, int);
 bool starvation_status(Animal *);
 bool breeding_status(Animal *);
-bool animal_type(Animal*, char);
+bool animal_type(Animal *, char);
 
 #endif /* ANIMAL_LIB_H__ */

@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 Cell *compute_next_position(World *, int, int, char);
-void resolve_conflicts(Cell *);
+void resolve_conflicts(Cell *, int);
 void serial_implementation(World *);
 
 #endif /* SERIAL_LIB_H__ */
