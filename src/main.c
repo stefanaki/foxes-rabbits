@@ -38,23 +38,27 @@ int main(int argc, char **argv)
     init_world(&world);
 
     // Printing board
-    printf("===========\nGen %d, Subgen %s\n", 0, "red");
+    printf("Generation 0, red\n---------------\n");
+    printf("   00|01|02|03|");
     for (int k = 0; k < M; k++)
     {
+    printf("\n");
+    printf("0%d:",k);
         for (int l = 0; l < N; l++)
         {
             if (world.grid[k][l].type == ANIMAL &&
                 world.grid[k][l].animal->type == FOX)
-                printf("F\t");
+            printf(" F");
             else if (world.grid[k][l].type == ANIMAL && world.grid[k][l].animal->type == RABBIT)
-                printf("R\t");
+            printf(" R");
             else if (world.grid[k][l].type == ROCK)
-                printf("*\t");
+            printf(" *");
             else
-                printf("-\t");
+            printf("  ");
+            printf("|");
         }
-        printf("\n");
     }
+    printf("\n---------------\n");
 
     serial_implementation(&world);
 
