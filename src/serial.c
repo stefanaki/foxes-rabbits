@@ -30,59 +30,35 @@ Cell *compute_next_position(World *world, int i, int j, char animal_type)
 
   // top
   if (i - 1 >= 0 && world->grid[i - 1][j].type == EMPTY)
-  {
     available_cells[p++] = &world->grid[i - 1][j];
-  }
-  if (i - 1 >= 0 && fox_sees_rabbit(&world->grid[i - 1][j], animal_type))
-  {
+  else if (i - 1 >= 0 && fox_sees_rabbit(&world->grid[i - 1][j], animal_type))
     available_rabbit_cells[rabbit_p++] = &world->grid[i - 1][j];
-  }
 
   // right
   if (j + 1 < N && world->grid[i][j + 1].type == EMPTY)
-  {
     available_cells[p++] = &world->grid[i][j + 1];
-  }
-  if (j + 1 < N && fox_sees_rabbit(&world->grid[i][j + 1], animal_type))
-  {
+  else if (j + 1 < N && fox_sees_rabbit(&world->grid[i][j + 1], animal_type))
     available_rabbit_cells[rabbit_p++] = &world->grid[i][j + 1];
-  }
 
   // bottom
   if (i + 1 < M && world->grid[i + 1][j].type == EMPTY)
-  {
     available_cells[p++] = &world->grid[i + 1][j];
-  }
-  if (i + 1 < M && fox_sees_rabbit(&world->grid[i + 1][j], animal_type))
-  {
+  else if (i + 1 < M && fox_sees_rabbit(&world->grid[i + 1][j], animal_type))
     available_rabbit_cells[rabbit_p++] = &world->grid[i + 1][j];
-  }
 
   // left
   if (j - 1 >= 0 && world->grid[i][j - 1].type == EMPTY)
-  {
     available_cells[p++] = &world->grid[i][j - 1];
-  }
-  if (j - 1 >= 0 && fox_sees_rabbit(&world->grid[i][j - 1], animal_type))
-  {
+  else if (j - 1 >= 0 && fox_sees_rabbit(&world->grid[i][j - 1], animal_type))
     available_rabbit_cells[rabbit_p++] = &world->grid[i][j - 1];
-  }
 
   if (p == 0 && rabbit_p == 0)
-  {
     return NULL;
-  }
 
   int n = rabbit_p > 0 ? rabbit_p : p;
-
   int res = C % n;
 
-  if (rabbit_p > 0)
-  {
-    return available_rabbit_cells[res];
-  }
-
-  return available_cells[res];
+  return (rabbit_p > 0) ? available_rabbit_cells[res] : available_cells[res];
 }
 
 void resolve_conflicts(Cell *cell, int turn)
@@ -90,23 +66,22 @@ void resolve_conflicts(Cell *cell, int turn)
 
   // Function that resolves conflicts that might appear on a cell
   Animal *incoming;
-  if (cell->new_animals == 0)
+  if (!cell->new_animals)
   {
-    cell->type = cell->animal ? ANIMAL : EMPTY;
+    cell->type = (cell->animal) ? ANIMAL : EMPTY;
     return;
   }
 
   for (int i = 0; i < cell->new_animals; i++)
   {
     incoming = cell->incoming_animals[i];
-    if (cell->animal == NULL)
+    if (!cell->animal)
     {
-      cell->animal = incoming;
-      cell->type = ANIMAL;
+      modify_cell(cell, ANIMAL, incoming);
       continue;
     }
 
-    if (incoming != NULL)
+    if (incoming)
     {
       if (cell->animal->type == FOX)
       {
@@ -238,15 +213,10 @@ void serial_implementation(World *world)
           // move animal
           if (landing_pos != NULL)
           {
-            if (initial_pos->animal->type == FOX && initial_pos->animal->breeding_age >= fox_breeding)
+            if (initial_pos->type == ANIMAL && breeding_status(initial_pos->animal))
             {
-              initial_pos->incoming_animals[initial_pos->new_animals++] = create_animal(FOX);
-              initial_pos->animal->breeding_age = 0;
-            }
-            else if (initial_pos->animal->type == RABBIT && initial_pos->animal->breeding_age >= rabbit_breeding)
-            {
-              initial_pos->incoming_animals[initial_pos->new_animals++] = create_animal(RABBIT);
-              initial_pos->animal->breeding_age = 0;
+              initial_pos->incoming_animals[initial_pos->new_animals++] = create_animal(initial_pos->animal->type);
+              change_breeding_age(initial_pos->animal, 0);
             }
 
             landing_pos->incoming_animals[landing_pos->new_animals++] = initial_pos->animal;
