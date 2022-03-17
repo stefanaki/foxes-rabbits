@@ -38,8 +38,12 @@ int main(int argc, char **argv)
     init_world(&world);
 
     // Printing board
-    printf("Generation 0, red\n---------------\n");
-    printf("   00|01|02|03|");
+    printf("Generation 0, red\n");
+    for (int l = 0; l <= N; l++)
+        printf("---");
+    printf("\n   ");
+    for (int l = 0; l < N; l++)
+        printf("%02d|",l);
     for (int k = 0; k < M; k++)
     {
     printf("\n");
@@ -58,8 +62,11 @@ int main(int argc, char **argv)
             printf("|");
         }
     }
-    printf("\n---------------\n");
-
+    printf("\n");
+    for (int l = 0; l <= N; l++)
+        printf("---");
+    printf("\n");
+    
     serial_implementation(&world);
 
     // count rocks, rabbits and foxes

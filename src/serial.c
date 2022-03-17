@@ -242,8 +242,11 @@ void serial_implementation(World *world)
 
       // Printing board
       printf("Generation %d, %s\n", gen + 1, turn == 0 ? "red" : "black");
-      printf("---------------\n");
-      printf("   00|01|02|03|");
+      for (int l = 0; l <= N; l++)
+        printf("---");
+      printf("\n   ");
+      for (int l = 0; l < N; l++)
+        printf("%02d|",l);
       for (int k = 0; k < M; k++)
       {
         printf("\n");
@@ -263,7 +266,10 @@ void serial_implementation(World *world)
           printf("|");
         }
       }
-      printf("\n---------------\n");
+      printf("\n");
+      for (int l = 0; l <= N; l++)
+        printf("---");
+      printf("\n");
     }
   }
 }
