@@ -96,7 +96,17 @@ void resolve_conflicts(Cell *cell, int turn)
         {
           // Animal on cell is FOX and incoming animal is
           // FOX = FOX with largest starvation age survives
-          if (cell->animal->starvation_age > incoming->starvation_age)
+          if (cell->animal->starvation_age == 0)
+          {
+            incoming = NULL;
+            cell->animal->starvation_age = 0;
+          }
+          else if (incoming->starvation_age == 0)
+          {
+            cell->animal = incoming;
+            incoming->starvation_age = 0;
+          }
+          else if (cell->animal->starvation_age > incoming->starvation_age)
           {
             incoming = NULL;
             //cell->animal->starvation_age = 0;
@@ -207,13 +217,15 @@ void serial_implementation(World *world)
           landing_pos =
               compute_next_position(world, i, j, initial_pos->animal->type);
 
-          // increase ages
-          initial_pos->animal->breeding_age++;
+          // increase starvation
           initial_pos->animal->starvation_age++;
 
           // move animal
-          if (landing_pos != NULL)
+          if (landing_pos)
           {
+            //Only breeds when he moves, i.e., has landing_pos
+            initial_pos->animal->breeding_age++;
+            
             if (initial_pos->type == ANIMAL && breeding_status(initial_pos->animal))
             {
               initial_pos->incoming_animals[initial_pos->new_animals++] = create_animal(initial_pos->animal->type);
