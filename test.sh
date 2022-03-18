@@ -1,13 +1,13 @@
 #!/bin/bash
-
 MAIN=out/main
 OUTPUT_DIR=out/output/
 DIFF_DIR=out/diff/
 INITIAL_INSTANCES_DIR=initial-instances/
-NEW_INSTANCES_DIR=initial-instances/new_instances/
+
 
 make clean
 make
+
 mkdir -p ${OUTPUT_DIR}
 mkdir -p ${DIFF_DIR}
 
