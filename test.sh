@@ -8,25 +8,27 @@ NEW_INSTANCES_DIR=initial-instances/new_instances/
 
 make clean
 make
-
 mkdir -p ${OUTPUT_DIR}
 mkdir -p ${DIFF_DIR}
 
-${MAIN} 25 4 4 3 2 1 1 10 4 123 > ${OUTPUT_DIR}r25-4-4-3-2-1-1-10-4-123.out
-${MAIN} 25 4 4 3 2 2 1 10 4 123 > ${OUTPUT_DIR}r25-4-4-3-2-2-1-10-4-123.out
-${MAIN} 30 3 15 5 5 4 5 8 6 890 > ${OUTPUT_DIR}r30-3-15-5-5-4-5-8-6-890.out     
-${MAIN} 100 8 10 15 20 4 5 10 5 12345 > ${OUTPUT_DIR}r100-8-10-15-20-4-5-10-5-12345.out
+array=()
+while IFS= read -r -d $'\0'; do
+  array+=("$REPLY")
+done < <(find "${INITIAL_INSTANCES_DIR}" -type f -name "*.out" -print0)
 
-${MAIN} 100 8 10 15 20 4 5 10 5 12321 > ${OUTPUT_DIR}r100-8-10-15-20-4-5-10-5-12321.out
-${MAIN} 25 4 4 3 2 1 1 10 4 9876 > ${OUTPUT_DIR}r25-4-4-3-2-1-1-10-4-9876.out
-${MAIN} 25 4 4 3 2 2 1 10 4 9876 > ${OUTPUT_DIR}r25-4-4-3-2-2-1-10-4-9876.out
-${MAIN} 30 3 15 5 5 4 5 8 6 9876 > ${OUTPUT_DIR}r30-3-15-5-5-4-5-8-6-9876.out
 
-diff ${OUTPUT_DIR}r25-4-4-3-2-1-1-10-4-123.out ${INITIAL_INSTANCES_DIR}r25-4-4-3-2-1-1-10-4-123.out > ${DIFF_DIR}r25-4-4-3-2-1-1-10-4-123.diff 
-diff ${OUTPUT_DIR}r25-4-4-3-2-2-1-10-4-123.out ${INITIAL_INSTANCES_DIR}r25-4-4-3-2-2-1-10-4-123.out > ${DIFF_DIR}r25-4-4-3-2-2-1-10-4-123.diff
-diff ${OUTPUT_DIR}r30-3-15-5-5-4-5-8-6-890.out  ${INITIAL_INSTANCES_DIR}r30-3-15-5-5-4-5-8-6-890.out  > ${DIFF_DIR}r30-3-15-5-5-4-5-8-6-890.diff 
-diff ${OUTPUT_DIR}r100-8-10-15-20-4-5-10-5-12345.out  ${INITIAL_INSTANCES_DIR}r100-8-10-15-20-4-5-10-5-12345.out  > ${DIFF_DIR}r100-8-10-15-20-4-5-10-5-12345.diff
-diff ${OUTPUT_DIR}r100-8-10-15-20-4-5-10-5-12321.out  ${NEW_INSTANCES_DIR}r100-8-10-15-20-4-5-10-5-12321.out  > ${DIFF_DIR}r100-8-10-15-20-4-5-10-5-12321.diff
-diff ${OUTPUT_DIR}r25-4-4-3-2-1-1-10-4-9876.out  ${NEW_INSTANCES_DIR}r25-4-4-3-2-1-1-10-4-9876.out  > ${DIFF_DIR}r25-4-4-3-2-1-1-10-4-9876.diff
-diff ${OUTPUT_DIR}r25-4-4-3-2-2-1-10-4-9876.out  ${NEW_INSTANCES_DIR}r25-4-4-3-2-2-1-10-4-9876.out  > ${DIFF_DIR}r25-4-4-3-2-2-1-10-4-9876.diff
-diff ${OUTPUT_DIR}r30-3-15-5-5-4-5-8-6-9876.out  ${NEW_INSTANCES_DIR}r30-3-15-5-5-4-5-8-6-9876.out  > ${DIFF_DIR}r30-3-15-5-5-4-5-8-6-9876.diff
+for file in "${array[@]}"; do
+  CURRENT_FILE="${file##*/}"
+  FILE_NO_EXTENSION="${CURRENT_FILE%.*}"
+  
+  PRE_COMMAND="${CURRENT_FILE//-/ }"
+  R_COMMAND="${PRE_COMMAND%.*}"
+  COMMAND="${R_COMMAND:1}"
+
+  # run the main
+  ${MAIN} ${COMMAND} > "${OUTPUT_DIR}""${CURRENT_FILE}" 
+
+  # generate diff
+  diff "${OUTPUT_DIR}""${CURRENT_FILE}" "${INITIAL_INSTANCES_DIR}" > "${DIFF_DIR}""${FILE_NO_EXTENSION}".diff
+  
+done
