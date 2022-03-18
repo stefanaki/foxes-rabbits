@@ -1,7 +1,7 @@
 #!/bin/bash
 MAIN=out/main
-OUTPUT_DIR=out/output/
-DIFF_DIR=out/diff/
+OUTPUT_DIR=out/output
+DIFF_DIR=out/diff
 INITIAL_INSTANCES_DIR=initial-instances/
 
 
@@ -26,9 +26,9 @@ for file in "${array[@]}"; do
   COMMAND="${R_COMMAND:1}"
 
   # run the main
-  ${MAIN} ${COMMAND} > "${OUTPUT_DIR}""${CURRENT_FILE}" 
+  ${MAIN} ${COMMAND} > "${OUTPUT_DIR}"/"${CURRENT_FILE}" 
 
   # generate diff
-  diff "${OUTPUT_DIR}""${CURRENT_FILE}" "${INITIAL_INSTANCES_DIR}" > "${DIFF_DIR}""${FILE_NO_EXTENSION}".diff
+  diff --color "${OUTPUT_DIR}"/"${CURRENT_FILE}" "${INITIAL_INSTANCES_DIR}" > "${DIFF_DIR}"/"${FILE_NO_EXTENSION}".diff
   
 done

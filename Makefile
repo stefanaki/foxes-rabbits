@@ -15,4 +15,4 @@ $(OUT)/%.o: ./src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OUT)/*
+	rm -f $(OUT)/* $(OUT)/*/*
