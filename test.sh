@@ -1,12 +1,32 @@
+#!/bin/bash
+
+MAIN=out/main
+OUTPUT_DIR=out/output/
+DIFF_DIR=out/diff/
+INITIAL_INSTANCES_DIR=initial-instances/
+NEW_INSTANCES_DIR=initial-instances/new_instances/
+
 make clean
 make
 
-./out/main 25 4 4 3 2 1 1 10 4 123 > ./out/r25-4-4-3-2-1-1-10-4-123.ours
-./out/main 25 4 4 3 2 2 1 10 4 123 > ./out/r25-4-4-3-2-2-1-10-4-123.ours
-./out/main 30 3 15 5 5 4 5 8 6 890 > ./out/r30-3-15-5-5-4-5-8-6-890.ours     
-./out/main 100 8 10 15 20 4 5 10 5 12345 > ./out/r100-8-10-15-20-4-5-10-5-12345.ours
+mkdir -p ${OUTPUT_DIR}
+mkdir -p ${DIFF_DIR}
 
-./out/main 100 8 10 15 20 4 5 10 5 12321 > ./out/r100-8-10-15-20-4-5-10-5-12321.out
-./out/main 25 4 4 3 2 1 1 10 4 9876 > ./out/r25-4-4-3-2-1-1-10-4-9876.out
-./out/main 25 4 4 3 2 2 1 10 4 9876 > ./out/r25-4-4-3-2-2-1-10-4-9876.out
-./out/main 30 3 15 5 5 4 5 8 6 9876 > ./out/r30-3-15-5-5-4-5-8-6-9876.out
+${MAIN} 25 4 4 3 2 1 1 10 4 123 > ${OUTPUT_DIR}r25-4-4-3-2-1-1-10-4-123.out
+${MAIN} 25 4 4 3 2 2 1 10 4 123 > ${OUTPUT_DIR}r25-4-4-3-2-2-1-10-4-123.out
+${MAIN} 30 3 15 5 5 4 5 8 6 890 > ${OUTPUT_DIR}r30-3-15-5-5-4-5-8-6-890.out     
+${MAIN} 100 8 10 15 20 4 5 10 5 12345 > ${OUTPUT_DIR}r100-8-10-15-20-4-5-10-5-12345.out
+
+${MAIN} 100 8 10 15 20 4 5 10 5 12321 > ${OUTPUT_DIR}r100-8-10-15-20-4-5-10-5-12321.out
+${MAIN} 25 4 4 3 2 1 1 10 4 9876 > ${OUTPUT_DIR}r25-4-4-3-2-1-1-10-4-9876.out
+${MAIN} 25 4 4 3 2 2 1 10 4 9876 > ${OUTPUT_DIR}r25-4-4-3-2-2-1-10-4-9876.out
+${MAIN} 30 3 15 5 5 4 5 8 6 9876 > ${OUTPUT_DIR}r30-3-15-5-5-4-5-8-6-9876.out
+
+diff ${OUTPUT_DIR}r25-4-4-3-2-1-1-10-4-123.out ${INITIAL_INSTANCES_DIR}r25-4-4-3-2-1-1-10-4-123.out > ${DIFF_DIR}r25-4-4-3-2-1-1-10-4-123.diff 
+diff ${OUTPUT_DIR}r25-4-4-3-2-2-1-10-4-123.out ${INITIAL_INSTANCES_DIR}r25-4-4-3-2-2-1-10-4-123.out > ${DIFF_DIR}r25-4-4-3-2-2-1-10-4-123.diff
+diff ${OUTPUT_DIR}r30-3-15-5-5-4-5-8-6-890.out  ${INITIAL_INSTANCES_DIR}r30-3-15-5-5-4-5-8-6-890.out  > ${DIFF_DIR}r30-3-15-5-5-4-5-8-6-890.diff 
+diff ${OUTPUT_DIR}r100-8-10-15-20-4-5-10-5-12345.out  ${INITIAL_INSTANCES_DIR}r100-8-10-15-20-4-5-10-5-12345.out  > ${DIFF_DIR}r100-8-10-15-20-4-5-10-5-12345.diff
+diff ${OUTPUT_DIR}r100-8-10-15-20-4-5-10-5-12321.out  ${NEW_INSTANCES_DIR}r100-8-10-15-20-4-5-10-5-12321.out  > ${DIFF_DIR}r100-8-10-15-20-4-5-10-5-12321.diff
+diff ${OUTPUT_DIR}r25-4-4-3-2-1-1-10-4-9876.out  ${NEW_INSTANCES_DIR}r25-4-4-3-2-1-1-10-4-9876.out  > ${DIFF_DIR}r25-4-4-3-2-1-1-10-4-9876.diff
+diff ${OUTPUT_DIR}r25-4-4-3-2-2-1-10-4-9876.out  ${NEW_INSTANCES_DIR}r25-4-4-3-2-2-1-10-4-9876.out  > ${DIFF_DIR}r25-4-4-3-2-2-1-10-4-9876.diff
+diff ${OUTPUT_DIR}r30-3-15-5-5-4-5-8-6-9876.out  ${NEW_INSTANCES_DIR}r30-3-15-5-5-4-5-8-6-9876.out  > ${DIFF_DIR}r30-3-15-5-5-4-5-8-6-9876.diff
