@@ -58,8 +58,7 @@ void init_world(World *world)
   {
     for (int j = 0; j < N; ++j)
     {
-      world->grid[i][j].type = EMPTY;
-      world->grid[i][j].animal = NULL;
+      modify_cell(&world->grid[i][j], EMPTY, NULL);
       world->grid[i][j].board_index = i * N + j;
     }
   }

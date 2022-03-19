@@ -61,7 +61,7 @@ Cell *compute_next_position(World *world, int i, int j, char animal_type)
   return (rabbit_p > 0) ? available_rabbit_cells[res] : available_cells[res];
 }
 
-void resolve_conflicts(Cell *cell, int turn)
+void resolve_conflicts(Cell *cell)
 {
   // Function that resolves conflicts that might appear on a cell
 
@@ -145,7 +145,8 @@ void resolve_conflicts(Cell *cell, int turn)
 
 void serial_implementation(World *world)
 {
-  int i, j, gen, turn, col_offset;
+  bool col_offset;
+  int i, j, gen, turn;
   Cell *initial_pos = NULL, *landing_pos = NULL;
 
   for (gen = 0; gen < generations; ++gen)
@@ -190,11 +191,10 @@ void serial_implementation(World *world)
             }
 
             landing_pos->incoming_animals[landing_pos->new_animals++] = initial_pos->animal;
-            initial_pos->type = EMPTY;
-            initial_pos->animal = NULL;
+            modify_cell(initial_pos, EMPTY, NULL);
           }
         }
-        col_offset = (col_offset == 0) ? 1 : 0;
+        col_offset = !col_offset;
       }
 
       for (int k = 0; k < M; k++)
@@ -203,7 +203,7 @@ void serial_implementation(World *world)
         {
           if (world->grid[k][l].type != ROCK)
           {
-            resolve_conflicts(&world->grid[k][l], turn);
+            resolve_conflicts(&world->grid[k][l]);
 
             if (turn && world->grid[k][l].animal) // Last Sub_Gen and animal
             {

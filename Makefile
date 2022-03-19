@@ -1,7 +1,7 @@
 .PHONY: all clean
 
 CC = gcc
-CFLAGS = -g -Wall -O2 -Iinclude
+CFLAGS = -g -Wall -O3 -Iinclude
 LIBS = 
 SHELL = /bin/bash
 OUT = ./out

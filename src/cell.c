@@ -3,15 +3,15 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-void insert_element(Cell *cell, char atype)
+void insert_element(Cell *cell, char type)
 {
-  if (atype == ROCK)
+  if (type == ROCK)
   {
     modify_cell(cell, ROCK, NULL);
     return;
   }
 
-  Animal *animal = create_animal(atype);
+  Animal *animal = create_animal(type);
   modify_cell(cell, ANIMAL, animal);
 }
 

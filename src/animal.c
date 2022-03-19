@@ -6,9 +6,9 @@ extern uint32_t fox_breeding;
 extern uint32_t fox_starvation;
 extern uint32_t rabbit_breeding;
 
-bool animal_type(Animal *animal, char atype)
+bool animal_type(Animal *animal, char type)
 {
-  return animal->type == atype;
+  return animal->type == type;
 }
 
 void change_starvation_age(Animal *animal, int n_age)
