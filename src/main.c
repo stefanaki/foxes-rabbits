@@ -38,34 +38,7 @@ int main(int argc, char **argv)
     init_world(&world);
 
     // Printing board
-    printf("Generation 0, red\n");
-    for (int l = 0; l <= N; l++)
-        printf("---");
-    printf("\n   ");
-    for (int l = 0; l < N; l++)
-        printf("%02d|",l);
-    for (int k = 0; k < M; k++)
-    {
-    printf("\n");
-    printf("0%d:",k);
-        for (int l = 0; l < N; l++)
-        {
-            if (world.grid[k][l].type == ANIMAL &&
-                world.grid[k][l].animal->type == FOX)
-            printf(" F");
-            else if (world.grid[k][l].type == ANIMAL && world.grid[k][l].animal->type == RABBIT)
-            printf(" R");
-            else if (world.grid[k][l].type == ROCK)
-            printf(" *");
-            else
-            printf("  ");
-            printf("|");
-        }
-    }
-    printf("\n");
-    for (int l = 0; l <= N; l++)
-        printf("---");
-    printf("\n");
+    print_board(&world, -1,0);
     
     serial_implementation(&world);
 

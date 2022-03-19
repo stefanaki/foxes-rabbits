@@ -63,8 +63,8 @@ Cell *compute_next_position(World *world, int i, int j, char animal_type)
 
 void resolve_conflicts(Cell *cell, int turn)
 {
-
   // Function that resolves conflicts that might appear on a cell
+
   Animal *incoming;
   if (!cell->new_animals)
   {
@@ -83,74 +83,56 @@ void resolve_conflicts(Cell *cell, int turn)
 
     if (cell->animal->type == FOX)
     {
-      if (incoming->type == RABBIT)
+      if (incoming->type == RABBIT) // FOX<->RABBIT
       {
         incoming = NULL;
         cell->animal->starvation_age = 0;
       }
-      else if (incoming->type == FOX)
+      else if (incoming->type == FOX) // FOX<->FOX
       {
-        if (cell->animal->starvation_age == 0)
+        if (!cell->animal->starvation_age)
         {
           incoming = NULL;
           cell->animal->starvation_age = 0;
         }
-        else if (incoming->starvation_age == 0)
+        else if (!incoming->starvation_age)
         {
           cell->animal = incoming;
           incoming->starvation_age = 0;
         }
-        // Animal on cell is FOX and incoming animal is
-        // FOX = FOX with largest starvation age survives
-        else if (cell->animal->starvation_age > incoming->starvation_age)
+        else if (cell->animal->breeding_age > incoming->breeding_age)
         {
           incoming = NULL;
         }
-        else if (incoming->starvation_age > cell->animal->starvation_age)
+        else if (incoming->breeding_age > cell->animal->breeding_age)
         {
           cell->animal = incoming;
         }
-        else
+        else if (cell->animal->starvation_age < incoming->starvation_age)
         {
-          // Check for the largest breeding age
-          if (cell->animal->breeding_age > incoming->breeding_age)
-          {
-            incoming = NULL;
-          }
-          else if (incoming->breeding_age > cell->animal->breeding_age)
-          {
-            cell->animal = incoming;
-          }
-          else
-          {
-            // Both foxes die
-            incoming = NULL;
-            cell->type = EMPTY;
-          }
+          incoming = NULL;
+        }
+        else if (incoming->starvation_age < cell->animal->starvation_age)
+        {
+          cell->animal = incoming;
         }
       }
     }
     else if (cell->animal->type == RABBIT)
     {
-      if (incoming->type == FOX)
+      if (incoming->type == FOX) // RABBIT<->FOX
       {
-        // Animal on cell is RABBIT and incoming animal is
-        // FOX = FOX eats RABBIT
         cell->animal = incoming;
         incoming->starvation_age = 0;
       }
-      else if (incoming->type == RABBIT)
+      else if (incoming->type == RABBIT) // RABBIT<->RABBIT
       {
-        // Animal on cell is RABBIT and incoming animal is
-        // RABBIT = RABBIT with largest breeding age survives
         if (cell->animal->breeding_age >= incoming->breeding_age)
         {
           incoming = NULL;
-          //cell->animal->breeding_age++;
         }
         else
         {
-          //incoming->breeding_age++;
           cell->animal = incoming;
         }
       }
@@ -179,14 +161,11 @@ void serial_implementation(World *world)
 
           if (initial_pos->type != ANIMAL)
             continue;
-          else if (initial_pos->animal->modified_by_red && turn)
+          else if (turn && initial_pos->animal->modified_by_red)
           {
             initial_pos->animal->modified_by_red = false;
             continue;
           }
-
-          // mark animal as modified
-          initial_pos->animal->modified_by_red = !turn;
 
           landing_pos =
               compute_next_position(world, i, j, initial_pos->animal->type);
@@ -198,25 +177,24 @@ void serial_implementation(World *world)
           // move animal
           if (landing_pos)
           {
-            if (initial_pos->type == ANIMAL && breeding_status(initial_pos->animal))
+            // mark animal as modified
+            initial_pos->animal->modified_by_red = !turn;
+
+            if (breeding_status(initial_pos->animal))
             {
               Animal *aux = create_animal(initial_pos->animal->type);
               aux->modified_by_red = !turn;
 
               change_breeding_age(initial_pos->animal, 0);
-
               initial_pos->incoming_animals[initial_pos->new_animals++] = aux;
             }
-            
-            if (initial_pos->type == ANIMAL)
-            {
-              landing_pos->incoming_animals[landing_pos->new_animals++] = initial_pos->animal;
-              initial_pos->type = EMPTY;
-              initial_pos->animal = NULL;
-            }
+
+            landing_pos->incoming_animals[landing_pos->new_animals++] = initial_pos->animal;
+            initial_pos->type = EMPTY;
+            initial_pos->animal = NULL;
           }
         }
-        col_offset = col_offset == 0 ? 1 : 0;
+        col_offset = (col_offset == 0) ? 1 : 0;
       }
 
       for (int k = 0; k < M; k++)
@@ -226,53 +204,56 @@ void serial_implementation(World *world)
           if (world->grid[k][l].type != ROCK)
           {
             resolve_conflicts(&world->grid[k][l], turn);
-            if (turn && world->grid[k][l].animal)
+
+            if (turn && world->grid[k][l].animal) // Last Sub_Gen and animal
             {
               if (starvation_status(world->grid[k][l].animal))
-              {
                 kill_animal(&world->grid[k][l]);
-              }
+
               // reset turn
-              if (world->grid[k][l].animal)
-              {
+              if (world->grid[k][l].animal) // CANNOT RESET TO AN EMPTY CELL
                 world->grid[k][l].animal->modified_by_red = false;
-              }
             }
           }
         }
       }
 
       // Printing board
-      printf("Generation %d, %s\n", gen + 1, (!turn) ? "red" : "black");
-      for (int l = 0; l <= N; l++)
-        printf("---");
-      printf("\n   ");
-      for (int l = 0; l < N; l++)
-        printf("%02d|", l);
-      for (int k = 0; k < M; k++)
-      {
-        printf("\n");
-        printf("0%d:", k);
-        for (int l = 0; l < N; l++)
-        {
-          if (world->grid[k][l].type == ANIMAL &&
-              world->grid[k][l].animal->type == FOX)
-            printf(" F");
-          // printf("%d%d", world->grid[k][l].animal->breeding_age, world->grid[k][l].animal->starvation_age);
-          else if (world->grid[k][l].type == ANIMAL && world->grid[k][l].animal->type == RABBIT)
-          printf(" R");
-          //  printf("0%d", world->grid[k][l].animal->breeding_age);
-          else if (world->grid[k][l].type == ROCK)
-            printf(" *");
-          else
-            printf("  ");
-          printf("|");
-        }
-      }
-      printf("\n");
-      for (int l = 0; l <= N; l++)
-        printf("---");
-      printf("\n");
+      print_board(world, gen, turn);
     }
   }
+}
+
+void print_board(World *world, int gen, int turn)
+{
+  printf("Generation %d, %s\n", gen + 1, (!turn) ? "red" : "black");
+  for (int l = 0; l <= N; l++)
+    printf("---");
+  printf("\n   ");
+  for (int l = 0; l < N; l++)
+    printf("%02d|", l);
+  for (int k = 0; k < M; k++)
+  {
+    printf("\n");
+    printf("0%d:", k);
+    for (int l = 0; l < N; l++)
+    {
+      if (world->grid[k][l].type == ANIMAL &&
+          world->grid[k][l].animal->type == FOX)
+        printf(" F");
+      // printf("%d%d", world->grid[k][l].animal->breeding_age, world->grid[k][l].animal->starvation_age);
+      else if (world->grid[k][l].type == ANIMAL && world->grid[k][l].animal->type == RABBIT)
+        printf(" R");
+      //  printf("0%d", world->grid[k][l].animal->breeding_age);
+      else if (world->grid[k][l].type == ROCK)
+        printf(" *");
+      else
+        printf("  ");
+      printf("|");
+    }
+  }
+  printf("\n");
+  for (int l = 0; l <= N; l++)
+    printf("---");
+  printf("\n");
 }
