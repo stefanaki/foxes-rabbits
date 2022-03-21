@@ -60,6 +60,7 @@ void init_world(World *world)
     {
       modify_cell(&world->grid[i][j], EMPTY, NULL);
       world->grid[i][j].board_index = i * N + j;
+      world->grid[i][j].new_animals = 0;
     }
   }
   generate_element(n_rocks, ROCK, &seed, world);

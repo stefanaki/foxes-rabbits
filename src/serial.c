@@ -219,7 +219,7 @@ void serial_implementation(World *world)
       }
 
       // Printing board
-      print_board(world, gen, turn);
+      //print_board(world, gen, turn);
     }
   }
 }

@@ -1,5 +1,5 @@
 #!/bin/bash
-MAIN=out/main
+MAIN=out/foxes-rabbits
 OUTPUT_DIR=out/output
 DIFF_DIR=out/diff
 INITIAL_INSTANCES_DIR=initial-instances/
