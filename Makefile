@@ -1,6 +1,6 @@
 .PHONY: all clean
 
-CC = gcc
+CC = gcc-11
 CFLAGS = -g -Wall -O3 -Iinclude -fopenmp
 LIBS = 
 SHELL = /bin/bash
