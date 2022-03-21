@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <omp.h>
 #include "world.h"
 #include "worldgen.h"
 #include "serial.h"
@@ -19,6 +20,7 @@ uint32_t seed;
 int main(int argc, char **argv)
 {
     World world = (World){};
+    //double exec_time; 
     // foxes-rabbits <# generations> <M> <N> <# rocks> <# rabbits>
     //  <rabbit breeding> <# foxes> <fox breeding> <fox starvation> <seed>
 
@@ -40,8 +42,11 @@ int main(int argc, char **argv)
     // Printing board
     print_board(&world, -1,0);
     
+    //exec_time = -omp_get_wtime();
     serial_implementation(&world);
+    //exec_time += omp_get_wtime();
 
+    //fprintf(stderr, "%.1fs\n", exec_time);
     // count rocks, rabbits and foxes
     int rocks = 0, rabbits = 0, foxes = 0;
     for (int k = 0; k < M; k++)
@@ -67,7 +72,7 @@ int main(int argc, char **argv)
         }
     }
 
-    printf("%d %d %d\n", rocks, rabbits, foxes);
+    fprintf(stdout, "%d %d %d\n", rocks, rabbits, foxes);
 
     return 0;
 }
