@@ -2,10 +2,8 @@
 MAIN=out/foxes-rabbits
 OUTPUT_DIR=out/output
 DIFF_DIR=out/diff
-INSTANCES_DIR=larger-instances/
-# larger-instances for larger runtime
-# initial-instances for normal runtime
-
+if [ "$1" != "large-only" ]; then INITIAL_INSTANCES_DIR=initial-instances/; fi
+if [ "$1" = "all" -o "$1" = "large-only" ]; then LARGER_INSTANCES_DIR=larger-instances/; fi
 
 make clean
 make
@@ -16,7 +14,7 @@ mkdir -p ${DIFF_DIR}
 array=()
 while IFS= read -r -d $'\0'; do
   array+=("$REPLY")
-done < <(find "${INSTANCES_DIR}" -type f -name "*.out" -print0)
+done < <(find "${INITIAL_INSTANCES_DIR}" "${LARGER_INSTANCES_DIR}" -type f -name "*.out" -print0)
 
 
 for file in "${array[@]}"; do
