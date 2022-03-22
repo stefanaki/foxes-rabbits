@@ -1,5 +1,6 @@
 #!/bin/bash
 MAIN=./foxes-rabbits
+DEBUG=1 # set the debug variable here [0 or 1] -> output will have or not the maps
 OUTPUT_DIR=out/output
 DIFF_DIR=out/diff
 if [ "$1" != "large-only" ]; then INITIAL_INSTANCES_DIR=initial-instances/; fi
@@ -25,10 +26,10 @@ for file in "${array[@]}"; do
   R_COMMAND="${PRE_COMMAND%.*}"
   COMMAND="${R_COMMAND:1}"
 
-  echo ${COMMAND} RESULT:
+  echo ${COMMAND} ${DEBUG} RESULT:
 
-  # run the main
-  ${MAIN} ${COMMAND} > "${OUTPUT_DIR}"/"${CURRENT_FILE}" 
+  # run the main with 1 for debug mode
+  ${MAIN} ${COMMAND} ${DEBUG} > "${OUTPUT_DIR}"/"${CURRENT_FILE}" 
 
   # generate diff
   diff "${OUTPUT_DIR}"/"${CURRENT_FILE}" "${file}" > "${DIFF_DIR}"/"${FILE_NO_EXTENSION}".diff

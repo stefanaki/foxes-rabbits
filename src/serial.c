@@ -15,6 +15,8 @@ extern uint32_t fox_breeding;
 extern uint32_t fox_starvation;
 extern uint32_t seed;
 
+extern uint8_t debug;
+
 bool fox_sees_rabbit(Cell *cell, char type)
 {
   return type == FOX && cell->animal && animal_type(cell->animal, RABBIT);
@@ -224,7 +226,10 @@ void serial_implementation(World *world)
       }
 
       // Printing board
-      // print_board(world, gen, turn);
+      if (debug)
+      {
+        print_board(world, gen, turn);
+      }
     }
   }
 }

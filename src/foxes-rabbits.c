@@ -17,6 +17,9 @@ uint32_t fox_breeding;
 uint32_t fox_starvation;
 uint32_t seed;
 
+// for debug, set debug != 0
+uint8_t debug;
+
 int main(int argc, char **argv)
 {
     World world = (World){};
@@ -37,10 +40,19 @@ int main(int argc, char **argv)
     fox_starvation = atoi(argv[9]);
     seed = atoi(argv[10]);
 
+    // define the debug variable for internal tests
+    if (argc == 12)
+    {
+        debug = atoi(argv[11]);
+    }
+
     init_world(&world);
 
     // Printing board
-    // print_board(&world, -1,0);
+    if (debug)
+    {
+        print_board(&world, -1, 0);
+    }
 
     exec_time = -omp_get_wtime();
     serial_implementation(&world);
