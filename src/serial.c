@@ -202,7 +202,7 @@ void serial_implementation(World *world)
           if (world->grid[k][l].type != ROCK)
           {
             resolve_conflicts(&world->grid[k][l]);
-            
+
             // reset new animal array
             world->grid[k][l].new_animals = 0;
 

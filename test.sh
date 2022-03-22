@@ -29,7 +29,7 @@ for file in "${array[@]}"; do
   echo ${COMMAND} ${DEBUG} RESULT:
 
   # run the main with 1 for debug mode
-  ${MAIN} ${COMMAND} > "${OUTPUT_DIR}"/"${CURRENT_FILE}" 
+  ${MAIN} ${COMMAND} ${DEBUG} > "${OUTPUT_DIR}"/"${CURRENT_FILE}" 
 
   # generate diff
   diff "${OUTPUT_DIR}"/"${CURRENT_FILE}" "${file}" > "${DIFF_DIR}"/"${FILE_NO_EXTENSION}".diff
