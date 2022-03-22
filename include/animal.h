@@ -20,10 +20,7 @@ typedef struct Animal
 } Animal;
 
 Animal *create_animal(char);
-void reset_animal(Animal *);
-bool check_life(Animal *);
 void change_breeding_age(Animal *, int);
-void change_starvation_age(Animal *, int);
 bool starvation_status(Animal *);
 bool breeding_status(Animal *);
 bool animal_type(Animal *, char);

@@ -22,8 +22,6 @@ typedef struct Cell
 void modify_cell(Cell *, char, Animal *);
 void insert_element(Cell *, char);
 void kill_animal(Cell *);
-void move_animal(Cell *, Cell *);
-void breed(Cell *, Animal *);
 bool position_empty(Cell *);
 void cell_cleanup(Cell *);
 
