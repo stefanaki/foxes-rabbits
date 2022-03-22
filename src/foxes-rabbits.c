@@ -20,7 +20,7 @@ uint32_t seed;
 int main(int argc, char **argv)
 {
     World world = (World){};
-    double exec_time; 
+    double exec_time;
     // foxes-rabbits <# generations> <M> <N> <# rocks> <# rabbits>
     //  <rabbit breeding> <# foxes> <fox breeding> <fox starvation> <seed>
 
@@ -40,8 +40,8 @@ int main(int argc, char **argv)
     init_world(&world);
 
     // Printing board
-    //print_board(&world, -1,0);
-    
+    // print_board(&world, -1,0);
+
     exec_time = -omp_get_wtime();
     serial_implementation(&world);
     exec_time += omp_get_wtime();
@@ -73,6 +73,8 @@ int main(int argc, char **argv)
     }
 
     fprintf(stdout, "%d %d %d\n", rocks, rabbits, foxes);
+
+    world_cleanup(&world);
 
     return 0;
 }

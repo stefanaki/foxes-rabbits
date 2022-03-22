@@ -85,6 +85,7 @@ void resolve_conflicts(Cell *cell)
     {
       if (incoming->type == RABBIT) // FOX<->RABBIT
       {
+        free(incoming);
         incoming = NULL;
         cell->animal->starvation_age = 0;
       }
@@ -92,6 +93,7 @@ void resolve_conflicts(Cell *cell)
       {
         if (!cell->animal->starvation_age)
         {
+          free(incoming);
           incoming = NULL;
           cell->animal->starvation_age = 0;
         }
@@ -102,6 +104,7 @@ void resolve_conflicts(Cell *cell)
         }
         else if (cell->animal->breeding_age > incoming->breeding_age)
         {
+          free(incoming);
           incoming = NULL;
         }
         else if (incoming->breeding_age > cell->animal->breeding_age)
@@ -110,6 +113,7 @@ void resolve_conflicts(Cell *cell)
         }
         else if (cell->animal->starvation_age < incoming->starvation_age)
         {
+          free(incoming);
           incoming = NULL;
         }
         else if (incoming->starvation_age < cell->animal->starvation_age)
@@ -129,6 +133,7 @@ void resolve_conflicts(Cell *cell)
       {
         if (cell->animal->breeding_age >= incoming->breeding_age)
         {
+          free(incoming);
           incoming = NULL;
         }
         else
@@ -219,7 +224,7 @@ void serial_implementation(World *world)
       }
 
       // Printing board
-      //print_board(world, gen, turn);
+      // print_board(world, gen, turn);
     }
   }
 }

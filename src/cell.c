@@ -30,3 +30,8 @@ void kill_animal(Cell *cell)
 }
 
 bool position_empty(Cell *cell) { return cell->type == EMPTY; }
+
+void cell_cleanup(Cell *cell)
+{
+  free(cell);
+}

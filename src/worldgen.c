@@ -67,3 +67,8 @@ void init_world(World *world)
   generate_element(n_rabbits, RABBIT, &seed, world);
   generate_element(n_foxes, FOX, &seed, world);
 }
+
+void world_cleanup(World *world)
+{
+  free(world->grid);
+}

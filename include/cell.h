@@ -25,5 +25,6 @@ void kill_animal(Cell *);
 void move_animal(Cell *, Cell *);
 void breed(Cell *, Animal *);
 bool position_empty(Cell *);
+void cell_cleanup(Cell *);
 
 #endif /* CELL_LIB_H__ */
