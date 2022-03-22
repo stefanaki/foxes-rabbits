@@ -41,10 +41,7 @@ int main(int argc, char **argv)
     seed = atoi(argv[10]);
 
     // define the debug variable for internal tests
-    if (argc == 12)
-    {
-        debug = atoi(argv[11]);
-    }
+    debug = (argc == 12) ? atoi(argv[11]) : 0;
 
     init_world(&world);
 
