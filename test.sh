@@ -15,7 +15,7 @@ mkdir -p ${DIFF_DIR}
 array=()
 while IFS= read -r -d $'\0'; do
   array+=("$REPLY")
-done < <(find "${INITIAL_INSTANCES_DIR}" "${LARGER_INSTANCES_DIR}" -type f -name "*.out" -print0)
+done < <(find ${INITIAL_INSTANCES_DIR} ${LARGER_INSTANCES_DIR} -type f -name "*.out" -print0)
 
 
 for file in "${array[@]}"; do
@@ -29,7 +29,7 @@ for file in "${array[@]}"; do
   echo ${COMMAND} ${DEBUG} RESULT:
 
   # run the main with 1 for debug mode
-  ${MAIN} ${COMMAND} ${DEBUG} > "${OUTPUT_DIR}"/"${CURRENT_FILE}" 
+  ${MAIN} ${COMMAND} > "${OUTPUT_DIR}"/"${CURRENT_FILE}" 
 
   # generate diff
   diff "${OUTPUT_DIR}"/"${CURRENT_FILE}" "${file}" > "${DIFF_DIR}"/"${FILE_NO_EXTENSION}".diff
