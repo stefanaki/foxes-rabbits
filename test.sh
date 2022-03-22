@@ -1,5 +1,5 @@
 #!/bin/bash
-MAIN=out/foxes-rabbits
+MAIN=./foxes-rabbits
 OUTPUT_DIR=out/output
 DIFF_DIR=out/diff
 if [ "$1" != "large-only" ]; then INITIAL_INSTANCES_DIR=initial-instances/; fi
