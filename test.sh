@@ -1,6 +1,6 @@
 #!/bin/bash
 MAIN=./foxes-rabbits
-DEBUG=1 # set the debug variable here [0 or 1] -> output will have or not the maps
+DEBUG=0 # set the debug variable here [0 or 1] -> output will have or not the maps
 OUTPUT_DIR=out/output
 DIFF_DIR=out/diff
 if [ "$1" != "large-only" ]; then INITIAL_INSTANCES_DIR=initial-instances/; fi
