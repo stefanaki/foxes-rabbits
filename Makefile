@@ -2,16 +2,19 @@
 
 CC = gcc
 CFLAGS = -g -Wall -O3 -Iinclude -fopenmp
-LIBS = 
-SHELL = /bin/bash
-OUT = ./out
+
+OUT = out
+SRC = src
+
+SOURCES = $(filter-out $(SRC)/serial.c, $(wildcard $(SRC)/*.c))
+OBJECTS = $(patsubst $(SRC)/%.c, $(OUT)/%.o, $(SOURCES))
 
 all: foxes-rabbits
 
-foxes-rabbits: $(OUT)/foxes-rabbits.o $(OUT)/worldgen.o $(OUT)/cell.o $(OUT)/animal.o $(OUT)/serial.o
-	$(CC) $(CFLAGS) $(LIBS) $(OUT)/foxes-rabbits.o $(OUT)/worldgen.o $(OUT)/cell.o $(OUT)/animal.o $(OUT)/serial.o -o $@
+foxes-rabbits: $(OBJECTS)
+	$(CC) $(CFLAGS) $^ -o $@
 
-$(OUT)/%.o: ./src/%.c
+$(OUT)/%.o: $(SRC)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
