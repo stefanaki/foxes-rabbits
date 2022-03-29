@@ -132,7 +132,6 @@ void resolve_conflicts(Cell *cell)
     return;
   }
 
-#pragma omp parallel for
   for (int i = 0; i < cell->new_animals; i++)
   {
     // Function that resolves conflicts that might appear on a cell
@@ -150,7 +149,6 @@ void resolve_conflicts(Cell *cell)
 
 void parallel_implementation(World *world)
 {
-  bool col_offset;
   int i, j, gen, turn;
   // Cell *initial_pos = NULL, *landing_pos = NULL;
 
@@ -158,10 +156,10 @@ void parallel_implementation(World *world)
   {
     for (turn = 0; turn < 2; ++turn)
     {
-#pragma omp parallel for private(col_offset, i, j)
+#pragma omp parallel for private(j)
       for (i = 0; i < M; ++i)
       {
-        col_offset = turn == 1 ? i % 2 == 0 : i % 2 == 1;
+        bool col_offset = (turn == 1) ? !(i % 2) : (i % 2);
         for (j = col_offset; j < N; j += 2)
         {
           Cell *initial_pos = &world->grid[i][j];
@@ -203,20 +201,22 @@ void parallel_implementation(World *world)
         }
       }
 
-#pragma omp parallel for
-      for (int k = 0; k < M; k++)
+#pragma omp parallel
       {
-        for (int l = 0; l < N; l++)
+#pragma omp for collapse(2) nowait
+        for (int k = 0; k < M; k++)
         {
-          if (world->grid[k][l].type != ROCK)
+          for (int l = 0; l < N; l++)
           {
+            if (world->grid[k][l].type != ROCK)
+            {
+              resolve_conflicts(&world->grid[k][l]);
+              // reset new animal array
+              world->grid[k][l].new_animals = 0;
+            }
 
-            resolve_conflicts(&world->grid[k][l]);
-
-            // reset new animal array
-            world->grid[k][l].new_animals = 0;
-
-            if (turn && world->grid[k][l].animal) // Last Sub_Gen and animal
+            // Last Sub_Gen and animal
+            if (world->grid[k][l].type != ROCK && turn && world->grid[k][l].animal)
             {
               if (starvation_status(world->grid[k][l].animal))
                 kill_animal(&world->grid[k][l]);
