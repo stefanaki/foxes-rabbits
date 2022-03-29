@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+#include <omp.h>
 
 extern uint32_t generations;
 extern uint32_t M;
@@ -63,81 +64,87 @@ Cell *compute_next_position(World *world, int i, int j, char animal_type)
   return (rabbit_p > 0) ? available_rabbit_cells[res] : available_cells[res];
 }
 
+void resolve_merge(Animal **current, Animal *incoming)
+{
+  if ((*current)->type == FOX && incoming->type == RABBIT)
+  {
+    free(incoming);
+    incoming = NULL;
+    (*current)->starvation_age = 0;
+  }
+  else if ((*current)->type == FOX && incoming->type == FOX)
+  {
+    if (!(*current)->starvation_age)
+    {
+      free(incoming);
+      incoming = NULL;
+      (*current)->starvation_age = 0;
+    }
+    else if (!incoming->starvation_age)
+    {
+      *current = incoming;
+      incoming->starvation_age = 0;
+    }
+    else if ((*current)->breeding_age > incoming->breeding_age)
+    {
+      free(incoming);
+      incoming = NULL;
+    }
+    else if (incoming->breeding_age > (*current)->breeding_age)
+    {
+      *current = incoming;
+    }
+    else if ((*current)->starvation_age < incoming->starvation_age)
+    {
+      free(incoming);
+      incoming = NULL;
+    }
+    else if (incoming->starvation_age < (*current)->starvation_age)
+    {
+      *current = incoming;
+    }
+  }
+  else if ((*current)->type == RABBIT && incoming->type == FOX)
+  {
+    *current = incoming;
+    incoming->starvation_age = 0;
+  }
+  else if ((*current)->type == RABBIT && incoming->type == RABBIT)
+  {
+    if ((*current)->breeding_age >= incoming->breeding_age)
+    {
+      free(incoming);
+      incoming = NULL;
+    }
+    else
+    {
+      *current = incoming;
+    }
+  }
+}
+
 void resolve_conflicts(Cell *cell)
 {
-  // Function that resolves conflicts that might appear on a cell
 
-  Animal *incoming;
   if (!cell->new_animals)
   {
     cell->type = (cell->animal) ? ANIMAL : EMPTY;
     return;
   }
 
+#pragma omp parallel for
   for (int i = 0; i < cell->new_animals; i++)
   {
-    incoming = cell->incoming_animals[i];
-    if (!cell->animal)
+    // Function that resolves conflicts that might appear on a cell
     {
-      modify_cell(cell, ANIMAL, incoming);
-      continue;
+      if (!cell->animal)
+      {
+        modify_cell(cell, ANIMAL, cell->incoming_animals[i]);
+        continue;
+      }
     }
 
-    if (cell->animal->type == FOX && incoming->type == RABBIT)
-    {
-      free(incoming);
-      incoming = NULL;
-      cell->animal->starvation_age = 0;
-    }
-    else if (cell->animal->type == FOX && incoming->type == FOX)
-    {
-      if (!cell->animal->starvation_age)
-      {
-        free(incoming);
-        incoming = NULL;
-        cell->animal->starvation_age = 0;
-      }
-      else if (!incoming->starvation_age)
-      {
-        cell->animal = incoming;
-        incoming->starvation_age = 0;
-      }
-      else if (cell->animal->breeding_age > incoming->breeding_age)
-      {
-        free(incoming);
-        incoming = NULL;
-      }
-      else if (incoming->breeding_age > cell->animal->breeding_age)
-      {
-        cell->animal = incoming;
-      }
-      else if (cell->animal->starvation_age < incoming->starvation_age)
-      {
-        free(incoming);
-        incoming = NULL;
-      }
-      else if (incoming->starvation_age < cell->animal->starvation_age)
-      {
-        cell->animal = incoming;
-      }
-    }
-    else if (cell->animal->type == RABBIT && incoming->type == FOX)
-    {
-      cell->animal = incoming;
-      incoming->starvation_age = 0;
-    }
-    else if (cell->animal->type == RABBIT && incoming->type == RABBIT)
-    {
-      if (cell->animal->breeding_age >= incoming->breeding_age)
-      {
-        free(incoming);
-        incoming = NULL;
-      }
-      else
-      {
-        cell->animal = incoming;
-      }
-    }
+    resolve_merge(&cell->animal, cell->incoming_animals[i]);
   }
 }
 
@@ -151,11 +158,10 @@ void parallel_implementation(World *world)
   {
     for (turn = 0; turn < 2; ++turn)
     {
-      col_offset = turn;
-
-#pragma omp parallel for
+#pragma omp parallel for private(col_offset, i, j)
       for (i = 0; i < M; ++i)
       {
+        col_offset = turn == 1 ? i % 2 == 0 : i % 2 == 1;
         for (j = col_offset; j < N; j += 2)
         {
           Cell *initial_pos = &world->grid[i][j];
@@ -168,12 +174,12 @@ void parallel_implementation(World *world)
             continue;
           }
 
-          Cell *landing_pos =
-              compute_next_position(world, i, j, initial_pos->animal->type);
-
           // increase starvation
           initial_pos->animal->starvation_age++;
           initial_pos->animal->breeding_age++;
+
+          Cell *landing_pos;
+          landing_pos = compute_next_position(world, i, j, initial_pos->animal->type);
 
           // move animal
           if (landing_pos)
@@ -189,20 +195,22 @@ void parallel_implementation(World *world)
               change_breeding_age(initial_pos->animal, 0);
               initial_pos->incoming_animals[initial_pos->new_animals++] = aux;
             }
-
+            // refactor this to instead of having an array, we copy the world for each cell and we do merges like we did before
             landing_pos->incoming_animals[landing_pos->new_animals++] = initial_pos->animal;
+
             modify_cell(initial_pos, EMPTY, NULL);
           }
         }
-        col_offset = !col_offset;
       }
 
+#pragma omp parallel for
       for (int k = 0; k < M; k++)
       {
         for (int l = 0; l < N; l++)
         {
           if (world->grid[k][l].type != ROCK)
           {
+
             resolve_conflicts(&world->grid[k][l]);
 
             // reset new animal array
