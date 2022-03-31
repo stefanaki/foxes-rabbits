@@ -6,7 +6,6 @@
 
 Cell *compute_next_position(World *, int, int, char);
 void resolve_conflicts(Cell *);
-void resolve_merge(Animal **, Animal *);
 void parallel_implementation(World *);
 void print_board(World *, int, int);
 

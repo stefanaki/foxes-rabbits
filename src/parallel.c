@@ -64,65 +64,6 @@ Cell *compute_next_position(World *world, int i, int j, char animal_type)
   return (rabbit_p > 0) ? available_rabbit_cells[res] : available_cells[res];
 }
 
-void resolve_merge(Animal **current, Animal *incoming)
-{
-  if ((*current)->type == FOX && incoming->type == RABBIT)
-  {
-    free(incoming);
-    incoming = NULL;
-    (*current)->starvation_age = 0;
-  }
-  else if ((*current)->type == FOX && incoming->type == FOX)
-  {
-    if (!(*current)->starvation_age)
-    {
-      free(incoming);
-      incoming = NULL;
-      (*current)->starvation_age = 0;
-    }
-    else if (!incoming->starvation_age)
-    {
-      *current = incoming;
-      incoming->starvation_age = 0;
-    }
-    else if ((*current)->breeding_age > incoming->breeding_age)
-    {
-      free(incoming);
-      incoming = NULL;
-    }
-    else if (incoming->breeding_age > (*current)->breeding_age)
-    {
-      *current = incoming;
-    }
-    else if ((*current)->starvation_age < incoming->starvation_age)
-    {
-      free(incoming);
-      incoming = NULL;
-    }
-    else if (incoming->starvation_age < (*current)->starvation_age)
-    {
-      *current = incoming;
-    }
-  }
-  else if ((*current)->type == RABBIT && incoming->type == FOX)
-  {
-    *current = incoming;
-    incoming->starvation_age = 0;
-  }
-  else if ((*current)->type == RABBIT && incoming->type == RABBIT)
-  {
-    if ((*current)->breeding_age >= incoming->breeding_age)
-    {
-      free(incoming);
-      incoming = NULL;
-    }
-    else
-    {
-      *current = incoming;
-    }
-  }
-}
-
 void resolve_conflicts(Cell *cell)
 {
 
@@ -143,7 +84,62 @@ void resolve_conflicts(Cell *cell)
       }
     }
 
-    resolve_merge(&cell->animal, cell->incoming_animals[i]);
+    Animal *incoming = cell->incoming_animals[i];
+    if (cell->animal->type == FOX && incoming->type == RABBIT)
+    {
+      free(incoming);
+      incoming = NULL;
+      cell->animal->starvation_age = 0;
+    }
+    else if (cell->animal->type == FOX && incoming->type == FOX)
+    {
+      if (!cell->animal->starvation_age)
+      {
+        free(incoming);
+        incoming = NULL;
+        cell->animal->starvation_age = 0;
+      }
+      else if (!incoming->starvation_age)
+      {
+        cell->animal = incoming;
+        incoming->starvation_age = 0;
+      }
+      else if (cell->animal->breeding_age > incoming->breeding_age)
+      {
+        free(incoming);
+        incoming = NULL;
+      }
+      else if (incoming->breeding_age > cell->animal->breeding_age)
+      {
+        cell->animal = incoming;
+      }
+      else if (cell->animal->starvation_age < incoming->starvation_age)
+      {
+        free(incoming);
+        incoming = NULL;
+      }
+      else if (incoming->starvation_age < cell->animal->starvation_age)
+      {
+        cell->animal = incoming;
+      }
+    }
+    else if (cell->animal->type == RABBIT && incoming->type == FOX)
+    {
+      cell->animal = incoming;
+      incoming->starvation_age = 0;
+    }
+    else if (cell->animal->type == RABBIT && incoming->type == RABBIT)
+    {
+      if (cell->animal->breeding_age >= incoming->breeding_age)
+      {
+        free(incoming);
+        incoming = NULL;
+      }
+      else
+      {
+        cell->animal = incoming;
+      }
+    }
   }
 }
 
