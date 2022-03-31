@@ -178,6 +178,7 @@ void parallel_implementation(World *world)
           // move animal
           if (landing_pos)
           {
+            int new_animal;
             // mark animal as modified
             initial_pos->animal->modified_by_red = !turn;
 
@@ -189,8 +190,10 @@ void parallel_implementation(World *world)
               change_breeding_age(initial_pos->animal, 0);
               initial_pos->incoming_animals[initial_pos->new_animals++] = aux;
             }
-            // refactor this to instead of having an array, we copy the world for each cell and we do merges like we did before
-            landing_pos->incoming_animals[landing_pos->new_animals++] = initial_pos->animal;
+            
+            #pragma omp atomic capture
+            new_animal = landing_pos->new_animals++;
+            landing_pos->incoming_animals[new_animal] = initial_pos->animal;
 
             modify_cell(initial_pos, EMPTY, NULL);
           }
