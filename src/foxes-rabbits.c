@@ -4,7 +4,7 @@
 #include <omp.h>
 #include "world.h"
 #include "worldgen.h"
-#include "parallel.h"
+#include "openmp.h"
 
 uint32_t generations;
 uint32_t M;

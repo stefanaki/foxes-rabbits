@@ -191,7 +191,7 @@ void parallel_implementation(World *world)
               initial_pos->incoming_animals[initial_pos->new_animals++] = aux;
             }
             
-            #pragma omp atomic capture
+#pragma omp atomic capture
             new_animal = landing_pos->new_animals++;
             landing_pos->incoming_animals[new_animal] = initial_pos->animal;
 

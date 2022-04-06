@@ -1,5 +1,5 @@
-#ifndef PARALLEL_LIB_H__
-#define PARALLEL_LIB_H__
+#ifndef OMP_IMPL_LIB_H__
+#define OMP_IMPL_LIB_H__
 
 #include "world.h"
 #include <stdlib.h>
@@ -9,4 +9,4 @@ void resolve_conflicts(Cell *);
 void parallel_implementation(World *);
 void print_board(World *, int, int);
 
-#endif /* PARALLEL_LIB_H__ */
+#endif /* OMP_IMPL_LIB_H__ */
