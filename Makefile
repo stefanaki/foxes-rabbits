@@ -6,7 +6,7 @@ CFLAGS = -g -Wall -O3 -Iinclude -fopenmp
 OUT = out
 SRC = src
 
-SOURCES = $(filter-out $(SRC)/serial.c, $(wildcard $(SRC)/*.c))
+SOURCES = $(filter-out $(SRC)/serial-implementation.c, $(wildcard $(SRC)/*.c))
 OBJECTS = $(patsubst $(SRC)/%.c, $(OUT)/%.o, $(SOURCES))
 
 all: foxes-rabbits
