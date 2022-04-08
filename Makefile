@@ -1,12 +1,12 @@
 .PHONY: all clean
 
-CC = gcc
-CFLAGS = -g -Wall -O3 -Iinclude -fopenmp
+CC = mpicc
+CFLAGS = -g -Wall -O3 -Iinclude
 
 OUT = out
 SRC = src
 
-SOURCES = $(filter-out $(SRC)/serial-implementation.c, $(wildcard $(SRC)/*.c))
+SOURCES = $(filter-out $(SRC)/serial-implementation.c $(SRC)/openmp-implementation.c, $(wildcard $(SRC)/*.c))
 OBJECTS = $(patsubst $(SRC)/%.c, $(OUT)/%.o, $(SOURCES))
 
 all: foxes-rabbits
