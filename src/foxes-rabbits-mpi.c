@@ -19,16 +19,19 @@ uint32_t fox_breeding;
 uint32_t fox_starvation;
 uint32_t seed;
 
-void print_board(Cell **grid, int chunk) {
+void print_board(Cell **grid, int chunk)
+{
   for (int l = 0; l <= N; l++)
     printf("---");
   printf("\n   ");
   for (int l = 0; l < N; l++)
     printf("%02d|", l);
-  for (int k = 0; k < chunk; k++) {
+  for (int k = 0; k < chunk; k++)
+  {
     printf("\n");
     printf("0%d:", k);
-    for (int l = 0; l < N; l++) {
+    for (int l = 0; l < N; l++)
+    {
       if (grid[k][l].type == ANIMAL && grid[k][l].animal->type == FOX)
         printf(" F");
       // printf("%d%d", world->grid[k][l].animal->breeding_age,
@@ -50,43 +53,53 @@ void print_board(Cell **grid, int chunk) {
 }
 
 void generate_element_mpi(int n, char atype, uint32_t *seed, Cell **grid,
-                          int rank, int chunk) {
+                          int rank, int chunk)
+{
   int i, j, k;
 
-  for (k = 0; k < n; k++) {
+  for (k = 0; k < n; k++)
+  {
     i = M * r4_uni(seed);
     j = N * r4_uni(seed);
 
     int element_rank = i / chunk;
     int i_local = i - rank * chunk;
 
-    if (rank == element_rank && position_empty(&grid[i_local][j])) {
+    if (rank == element_rank && position_empty(&grid[i_local][j]))
+    {
       insert_element(&grid[i_local][j], atype);
     }
   }
 }
 
 // Generate world subgrid based on process id
-Cell **generate_world_subgrid(int rank, int procs) {
+Cell **generate_world_subgrid(int rank, int procs)
+{
   Cell **subgrid;
   int chunk, chunk_board, parity_rows;
 
   chunk_board = M / procs;
   parity_rows = M - chunk_board * (procs - 1);
 
-  if (parity_rows && rank == procs - 1) {
+  if (parity_rows && rank == procs - 1)
+  {
     chunk = parity_rows;
-  } else {
+  }
+  else
+  {
     chunk = chunk_board;
   }
 
-  subgrid = (Cell *)malloc(sizeof(Cell) * chunk);
-  for (int i = 0; i < M; ++i) {
+  subgrid = (Cell **)malloc(sizeof(Cell) * chunk);
+  for (int i = 0; i < M; ++i)
+  {
     subgrid[i] = (Cell *)malloc(sizeof(Cell) * N);
   }
 
-  for (int i = 0; i < chunk; ++i) {
-    for (int j = 0; j < N; ++j) {
+  for (int i = 0; i < chunk; ++i)
+  {
+    for (int j = 0; j < N; ++j)
+    {
       modify_cell(&subgrid[i][j], EMPTY, NULL);
       subgrid[i][j].new_animals = 0;
     }
@@ -106,9 +119,10 @@ Cell **generate_world_subgrid(int rank, int procs) {
 // Implementation and process reduction
 // Print result
 
-int main(int argc, char **argv) {
-  World world = (World){};
-  double exec_time;
+int main(int argc, char **argv)
+{
+  // World world = (World){};
+  // double exec_time;
   int rank, num_procs;
   // foxes-rabbits <# generations> <M> <N> <# rocks> <# rabbits>
   //  <rabbit breeding> <# foxes> <fox breeding> <fox starvation> <seed>
