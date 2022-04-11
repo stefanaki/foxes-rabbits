@@ -59,14 +59,13 @@ void print_board(Cell **grid, int chunk)
 
 void generate_element_mpi(int n, char atype, uint32_t *seed, Cell **grid, int rank, int procs)
 {
-  int i, j, k;
+  int i, j, k, local_i;
 
   for (k = 0; k < n; k++)
   {
     i = M * r4_uni(seed);
     j = N * r4_uni(seed);
 
-    int local_i = i;
     int size = BLOCK_SIZE(rank, procs, M);
     for (int l = 0; l < size; l++)
     {
