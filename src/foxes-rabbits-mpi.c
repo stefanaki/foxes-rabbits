@@ -19,6 +19,11 @@ uint32_t fox_breeding;
 uint32_t fox_starvation;
 uint32_t seed;
 
+#define BLOCK_LOW(id, p, n) ((id) * (n) / (p))
+#define BLOCK_HIGH(id, p, n) (BLOCK_LOW((id) + 1, p, n) - 1)
+#define BLOCK_SIZE(id, p, n) (BLOCK_HIGH(id, p, n) - BLOCK_LOW(id, p, n) + 1)
+#define BLOCK_OWNER(j, p, n) (((p) * ((j) + 1) - 1) / (n))
+
 void print_board(Cell **grid, int chunk)
 {
   for (int l = 0; l <= N; l++)
@@ -52,8 +57,7 @@ void print_board(Cell **grid, int chunk)
   printf("\n");
 }
 
-void generate_element_mpi(int n, char atype, uint32_t *seed, Cell **grid,
-                          int rank, int chunk)
+void generate_element_mpi(int n, char atype, uint32_t *seed, Cell **grid, int rank, int procs)
 {
   int i, j, k;
 
@@ -62,12 +66,18 @@ void generate_element_mpi(int n, char atype, uint32_t *seed, Cell **grid,
     i = M * r4_uni(seed);
     j = N * r4_uni(seed);
 
-    int element_rank = i / chunk;
-    int i_local = i - rank * chunk;
-
-    if (rank == element_rank && position_empty(&grid[i_local][j]))
+    int local_i = i;
+    int size = BLOCK_SIZE(rank, procs, M);
+    for (int l = 0; l < size; l++)
     {
-      insert_element(&grid[i_local][j], atype);
+      local_i = i - BLOCK_LOW(rank, procs, M);
+    }
+
+    int element_rank = BLOCK_OWNER(i, procs, M);
+
+    if (rank == element_rank && position_empty(&grid[local_i][j]))
+    {
+      insert_element(&grid[local_i][j], atype);
     }
   }
 }
@@ -76,19 +86,8 @@ void generate_element_mpi(int n, char atype, uint32_t *seed, Cell **grid,
 Cell **generate_world_subgrid(int rank, int procs)
 {
   Cell **subgrid;
-  int chunk, chunk_board, parity_rows;
 
-  chunk_board = M / procs;
-  parity_rows = M - chunk_board * (procs - 1);
-
-  if (parity_rows && rank == procs - 1)
-  {
-    chunk = parity_rows;
-  }
-  else
-  {
-    chunk = chunk_board;
-  }
+  int chunk = BLOCK_SIZE(rank, procs, M);
 
   subgrid = (Cell **)malloc(sizeof(Cell) * chunk);
   for (int i = 0; i < M; ++i)
@@ -105,9 +104,9 @@ Cell **generate_world_subgrid(int rank, int procs)
     }
   }
 
-  generate_element_mpi(n_rocks, ROCK, &seed, subgrid, rank, chunk_board);
-  generate_element_mpi(n_rabbits, RABBIT, &seed, subgrid, rank, chunk_board);
-  generate_element_mpi(n_foxes, FOX, &seed, subgrid, rank, chunk_board);
+  generate_element_mpi(n_rocks, ROCK, &seed, subgrid, rank, procs);
+  generate_element_mpi(n_rabbits, RABBIT, &seed, subgrid, rank, procs);
+  generate_element_mpi(n_foxes, FOX, &seed, subgrid, rank, procs);
 
   printf("I am process %d. My allocated rows are:\n", rank);
   print_board(subgrid, chunk);
