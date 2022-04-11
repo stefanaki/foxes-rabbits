@@ -1,9 +1,7 @@
-#include "serial-implementation.h"
 #include "world.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <omp.h>
 
 extern uint32_t generations;
 extern uint32_t M;
