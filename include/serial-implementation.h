@@ -7,6 +7,6 @@
 Cell *compute_next_position(World *, int, int, char);
 void resolve_conflicts(Cell *);
 void serial_implementation(World *);
-void print_board(World*,  int,  int);
+void print_board(World *, int, int);
 
 #endif /* SERIAL_LIB_H__ */

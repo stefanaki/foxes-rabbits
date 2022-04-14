@@ -5,18 +5,18 @@
 
 enum ElementType
 {
-  EMPTY,
-  ANIMAL,
-  ROCK
+    EMPTY,
+    ANIMAL,
+    ROCK
 };
 
 typedef struct Cell
 {
-  char type;
-  Animal *animal;
-  Animal *incoming_animals[4];
-  uint16_t new_animals;
-  uint32_t board_index;
+    char type;
+    Animal *animal;
+    Animal *incoming_animals[4];
+    uint16_t new_animals;
+    uint32_t board_index;
 } Cell;
 
 void modify_cell(Cell *, char, Animal *);

@@ -7,16 +7,16 @@
 
 enum AnimalType
 {
-  RABBIT,
-  FOX
+    RABBIT,
+    FOX
 };
 
 typedef struct Animal
 {
-  char type;
-  uint16_t starvation_age;
-  uint16_t breeding_age;
-  bool modified_by_red;
+    char type;
+    uint16_t starvation_age;
+    uint16_t breeding_age;
+    bool modified_by_red;
 } Animal;
 
 Animal *create_animal(char);
