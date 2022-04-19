@@ -11,7 +11,7 @@ void generate_element_mpi(int, char, uint32_t *, Cell **, int, int);
 Cell **generate_world_subgrid(int, int);
 
 // Compute next position modified
-void compute_next_position(Cell **, int, int, int, int, int *);
+void compute_next_position(Cell **, int, int, char, int, int, Cell *, Cell *, int *);
 
 // Ask for data from cell that doesn't belong in the same process
 Cell get_cell_from_rank(int, int, int);

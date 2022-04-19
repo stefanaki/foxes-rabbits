@@ -1,4 +1,5 @@
 #include "mpi-implementation.h"
+#include "message-cell.h"
 #include "mpi.h"
 #include <stdio.h>
 
@@ -8,8 +9,10 @@
 #define BLOCK_OWNER(j, p, n) (((p) * ((j) + 1) - 1) / (n))
 
 #define MASTER_RANK 0
-#define ROW_SEND_PREV 123
-#define ROW_SEND_NEXT 456
+#define ROW_SEND_PREV 111
+#define ROW_SEND_NEXT 222
+#define ANIMAL_SEND_BUFFER 333
+#define ANIMAL_SEND 444
 
 extern uint32_t generations;
 extern uint32_t M;
@@ -174,56 +177,156 @@ void compute_next_position(Cell **grid, int i, int j, char animal_type,
   return;
 }
 
-// Ask for data from cell that doesn't belong in the same process
-Cell get_cell_from_rank(int rank, int i, int j) {
-  return *(Cell *)malloc(sizeof(Cell) * N);
+// Resolve conflicts modified
+void resolve_conflicts(Cell *cell) { // Function that resolves conflicts that
+                                     // might appear on a cell
+
+  Animal *incoming;
+  if (!cell->new_animals) {
+    cell->type = (cell->animal) ? ANIMAL : EMPTY;
+    return;
+  }
+
+  for (int i = 0; i < cell->new_animals; i++) {
+    incoming = cell->incoming_animals[i];
+    if (!cell->animal) {
+      modify_cell(cell, ANIMAL, incoming);
+      continue;
+    }
+
+    if (cell->animal->type == FOX && incoming->type == RABBIT) {
+      free(incoming);
+      incoming = NULL;
+      cell->animal->starvation_age = 0;
+    } else if (cell->animal->type == FOX && incoming->type == FOX) {
+      if (!cell->animal->starvation_age) {
+        free(incoming);
+        incoming = NULL;
+        cell->animal->starvation_age = 0;
+      } else if (!incoming->starvation_age) {
+        cell->animal = incoming;
+        incoming->starvation_age = 0;
+      } else if (cell->animal->breeding_age > incoming->breeding_age) {
+        free(incoming);
+        incoming = NULL;
+      } else if (incoming->breeding_age > cell->animal->breeding_age) {
+        cell->animal = incoming;
+      } else if (cell->animal->starvation_age < incoming->starvation_age) {
+        free(incoming);
+        incoming = NULL;
+      } else if (incoming->starvation_age < cell->animal->starvation_age) {
+        cell->animal = incoming;
+      }
+    } else if (cell->animal->type == RABBIT && incoming->type == FOX) {
+      cell->animal = incoming;
+      incoming->starvation_age = 0;
+    } else if (cell->animal->type == RABBIT && incoming->type == RABBIT) {
+      if (cell->animal->breeding_age >= incoming->breeding_age) {
+        free(incoming);
+        incoming = NULL;
+      } else {
+        cell->animal = incoming;
+      }
+    }
+  }
 }
 
-// Modify cell that doesn't belong to the same process
-void modify_cell_from_rank(int rank, int i, int j, Cell data) { return; }
-
-// Resolve conflicts modified
-void resolve_conflicts(Cell *cell) { return; }
-
 // Send generation result to master
-void send_result_to_master(Cell **grid, int rank, int procs, int totals[]) {
+void send_result_to_master(Cell **grid, int rank, int procs) {
+  int counters[3] = {0, 0, 0};
+
+  for (int i = 0; i < BLOCK_SIZE(rank, procs, M); ++i) {
+    for (int j = 0; j < N; ++j) {
+      if (grid[i][j].type == ROCK) {
+        counters[0]++;
+      } else if (grid[i][j].type == ANIMAL) {
+        if (grid[i][j].animal->type == FOX)
+          counters[1]++;
+        else
+          counters[2]++;
+      }
+    }
+  }
+
+  // Reduction
   return;
 }
 
 // Implementation and process reduction
 void mpi_implementation(Cell **grid, int rank, int procs) {
   bool col_offset;
-  int i, j, gen, turn;
+  int i, j, gen, turn, block_size;
   int landing_pos[2];
-  int total_elements[3] = {0, 0, 0}; // foxes, rabbits, rocks
+  int wait_counter = 0;
 
-  Cell recv_rows[2][N];
-  Cell sent_rows[2][N];
+  MessageCell recv_row_prev[N];
+  MessageCell recv_row_next[N];
+  MessageCell sending_row_prev[N];
+  MessageCell sending_row_next[N];
+
+  MPI_Datatype animal_dt;
+  int animal_blocklen[4] = {1, 1, 1, 1};
+  MPI_Aint animal_disp[4] = {offsetof(struct Animal, type),
+                             offsetof(struct Animal, starvation_age),
+                             offsetof(struct Animal, breeding_age),
+                             offsetof(struct Animal, modified_by_red)};
+  MPI_Datatype animal_datatypes = {MPI_CHAR, MPI_UINT16_T, MPI_UINT16_T,
+                                   MPI_C_BOOL};
+  MPI_Type_create_struct(4, animal_blocklen, animal_disp, animal_datatypes,
+                         &animal_dt);
+  MPI_Type_commit(&animal_dt);
+
+  MPI_Datatype message_cell_dt;
+  int message_cell_blocklen[4] = {4, 1, 1, 1};
+  MPI_Aint message_cell_disp[4] = {
+      offsetof(struct MessageCell, incoming_animals),
+      offsetof(struct MessageCell, animal),
+      offsetof(struct MessageCell, new_animals),
+      offsetof(struct MessageCell, type)};
+  MPI_Datatype message_cell_datatypes[4] = {animal_dt, animal_dt, MPI_INT,
+                                            MPI_CHAR};
+  MPI_Type_create_struct(4, message_cell_blocklen, message_cell_disp,
+                         message_cell_datatypes, &message_cell_dt);
+  MPI_Type_commit(&message_cell_dt);
 
   MPI_Request requests[4];
   MPI_Status statuses[4];
+  MPI_Request animal_requests[2];
+  MPI_Status animal_statuses[2];
+
+  block_size = BLOCK_SIZE(rank, procs, M);
 
   for (gen = 0; gen < generations; ++gen) {
     for (turn = 0; turn < 2; ++turn) {
-      // Receive previous and next rows
-      if (rank - 1 >= 0) {
-        MPI_IRecv(recv_rows[0], N * sizeof(Cell), MPI_BYTE, rank - 1,
-                  ROW_SEND_PREV, MPI_COMM_WORLD, requests[0]);
-        MPI_Isend(grid[0], N * sizeof(Cell), MPI_BYTE, rank - 1, ROW_SEND_NEXT,
-                  MPI_COMM_WORLD, requests[2]);
-      }
-      if (rank + 1 <= procs - 1) {
-        MPI_IRecv(recv_rows[1], N * sizeof(Cell), MPI_BYTE, rank + 1,
-                  ROW_SEND_NEXT, MPI_COMM_WORLD, requests[1]);
-        MPI_Isend(grid[BLOCK_SIZE(rank, procs, M) - 1], N * sizeof(Cell),
-                  MPI_BYTE, rank + 1, ROW_SEND_NEXT, MPI_COMM_WORLD,
-                  requests[3]);
-      }
-
-      MPI_Waitall(4, requests, statuses);
-
       col_offset = turn;
-      for (i = 0; i < BLOCK_SIZE(rank, procs, M); ++i) {
+      for (i = 0; i < block_size; ++i) {
+        if (i == 0 || i == block_size - 1) {
+          // Receive previous and next rows
+          if (rank - 1 >= 0) {
+            wait_counter += 2;
+            MPI_IRecv(recv_row_prev, N, message_cell_dt, rank - 1,
+                      ROW_SEND_PREV, MPI_COMM_WORLD, requests[0]);
+
+            init_message_cell_buffer(sending_row_prev, grid[0]);
+
+            MPI_Isend(sending_row_prev, N, message_cell_dt, rank - 1,
+                      ROW_SEND_PREV, MPI_COMM_WORLD, requests[2]);
+          }
+          if (rank + 1 <= procs - 1) {
+            wait_counter += 2;
+            MPI_IRecv(recv_row_next, N, message_cell_dt, rank + 1,
+                      ROW_SEND_NEXT, MPI_COMM_WORLD, requests[1]);
+
+            init_message_cell_buffer(sending_row_next, grid[block_size - 1]);
+
+            MPI_Isend(sending_row_next, N, message_cell_dt, rank + 1,
+                      ROW_SEND_NEXT, MPI_COMM_WORLD, requests[3]);
+          }
+
+          MPI_Waitall(wait_counter, requests, statuses);
+          wait_counter = 0;
+        }
+
         for (j = col_offset; j < N; j += 2) {
           if (grid[i][j].type != ANIMAL)
             continue;
@@ -235,7 +338,8 @@ void mpi_implementation(Cell **grid, int rank, int procs) {
           landing_pos[0] = landing_pos[1] = -1;
 
           compute_next_position(grid, i, j, grid[i][j].animal->type, rank,
-                                procs, recv_rows[0], recv_rows[1], landing_pos);
+                                procs, recv_row_prev, recv_row_next,
+                                landing_pos);
 
           grid[i][j].animal->starvation_age++;
           grid[i][j].animal->breeding_age++;
@@ -289,10 +393,13 @@ void mpi_implementation(Cell **grid, int rank, int procs) {
       }
     }
 
-    send_result_to_master(grid, rank, procs, total_elements);
+    send_result_to_master(grid, rank, procs);
   }
 
   if (rank == MASTER_RANK) {
     // output_final_population(total_elements);
   }
+
+  MPI_Type_free(&message_cell_dt);
+  MPI_Type_free(&animal_dt);
 }
