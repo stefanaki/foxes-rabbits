@@ -1,5 +1,6 @@
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+
 #include "world.h"
 
 #ifndef WORLDGEN_LIB_H__

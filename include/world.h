@@ -3,8 +3,7 @@
 #ifndef WORLD_LIB_H__
 #define WORLD_LIB_H__
 
-typedef struct World
-{
+typedef struct World {
     Cell **grid;
     int column_size;
     int row_size;

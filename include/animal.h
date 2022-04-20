@@ -5,14 +5,12 @@
 #ifndef ANIMAL_LIB_H__
 #define ANIMAL_LIB_H__
 
-enum AnimalType
-{
+enum AnimalType {
     RABBIT,
     FOX
 };
 
-typedef struct Animal
-{
+typedef struct Animal {
     char type;
     uint16_t starvation_age;
     uint16_t breeding_age;

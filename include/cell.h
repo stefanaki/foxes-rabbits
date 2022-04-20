@@ -3,15 +3,13 @@
 #ifndef CELL_LIB_H__
 #define CELL_LIB_H__
 
-enum ElementType
-{
+enum ElementType {
     EMPTY,
     ANIMAL,
     ROCK
 };
 
-typedef struct Cell
-{
+typedef struct Cell {
     char type;
     Animal *animal;
     Animal *incoming_animals[4];

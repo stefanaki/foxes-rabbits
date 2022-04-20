@@ -15,8 +15,7 @@ uint32_t seed;
 
 // Print result
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     // World world = (World){};
     // double exec_time;
     int rank, num_procs;

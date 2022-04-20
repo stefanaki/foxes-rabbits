@@ -1,10 +1,10 @@
 #ifndef MPI_IMPL_LIB_H__
 #define MPI_IMPL_LIB_H__
 
+#include "cell.h"
+#include "mpi.h"
 #include "world.h"
 #include "worldgen.h"
-#include "mpi.h"
-#include "cell.h"
 
 void generate_element_mpi(int, char, uint32_t *, Cell **, int, int);
 

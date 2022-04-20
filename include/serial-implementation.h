@@ -1,8 +1,9 @@
 #ifndef SERIAL_LIB_H__
 #define SERIAL_LIB_H__
 
-#include "world.h"
 #include <stdlib.h>
+
+#include "world.h"
 
 Cell *compute_next_position(World *, int, int, char);
 void resolve_conflicts(Cell *);
