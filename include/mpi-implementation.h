@@ -4,6 +4,7 @@
 #include "world.h"
 #include "worldgen.h"
 #include "mpi.h"
+#include "cell.h"
 
 void generate_element_mpi(int, char, uint32_t *, Cell **, int, int);
 
@@ -23,7 +24,7 @@ void modify_cell_from_rank(int, int, int, Cell);
 void resolve_conflicts(Cell *);
 
 // Send generation result to master
-void send_result_to_master(Cell **, int, int, int[]);
+void send_result_to_master(Cell **, int, int);
 
 // Implementation and process reduction
 void mpi_implementation(Cell **, int, int);
