@@ -12,7 +12,7 @@ void generate_element_mpi(int, char, uint32_t *, Cell **, int, int);
 Cell **generate_world_subgrid(int, int);
 
 // Compute next position modified
-void compute_next_position(Cell **, int, int, char, int, int, Cell *, Cell *, int *);
+void compute_next_position(Cell **, int, int, char, int, int, Cell *, int *);
 
 // Ask for data from cell that doesn't belong in the same process
 Cell get_cell_from_rank(int, int, int);
@@ -24,10 +24,10 @@ void modify_cell_from_rank(int, int, int, Cell);
 void resolve_conflicts(Cell *);
 
 // Send generation result to master
-void send_result_to_master(Cell **, int, int);
+void send_result_to_master(Cell **, int, int, int *);
 
 // Implementation and process reduction
-void mpi_implementation(Cell **, int, int);
+void mpi_implementation(Cell **, int, int, MPI_Datatype, int *);
 
 // Print the board
 void print_board(Cell **, int);

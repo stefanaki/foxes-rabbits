@@ -1,5 +1,7 @@
 #include "message-cell.h"
 
+#include <stdio.h>
+
 #include "cell.h"
 
 extern uint32_t generations;
@@ -16,10 +18,10 @@ extern uint32_t seed;
 void init_message_cell(MessageCell *message, Cell *cell) {
     message->type = cell->type;
     message->new_animals = cell->new_animals;
-    for (int i = 0; i < cell->new_animals; ++i)
+    for (int i = 0; i < cell->new_animals; ++i) {
         message->incoming_animals[i] = *(cell->incoming_animals[i]);
-    message->animal = *(cell->animal);
-    return;
+    }
+    message->animal = get_animal(cell);
 };
 
 void init_message_cell_buffer(MessageCell *buff, Cell *row) {

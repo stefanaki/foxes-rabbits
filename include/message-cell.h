@@ -17,5 +17,6 @@ typedef struct MessageCell {
 
 void init_message_cell(MessageCell *, Cell *);
 void init_message_cell_buffer(MessageCell *, Cell *);
+void convert_buffer_to_row(MessageCell *, Cell *);
 
 #endif /* MESSAGE_CELL_LIB_H__ */

@@ -22,5 +22,6 @@ void insert_element(Cell *, char);
 void kill_animal(Cell *);
 bool position_empty(Cell *);
 void cell_cleanup(Cell *);
+Animal get_animal(Cell *);
 
 #endif /* CELL_LIB_H__ */
