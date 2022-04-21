@@ -18,7 +18,7 @@ extern uint32_t seed;
 void init_message_cell(MessageCell *message, Cell *cell) {
     message->type = cell->type;
     message->new_animals = cell->new_animals;
-    printf("cell new animals:%d\n", cell->new_animals);
+    // printf("cell new animals:%d\n", cell->new_animals);
     for (int i = 0; i < cell->new_animals; ++i) {
         Animal *temp = malloc(sizeof(Animal));
         temp->breeding_age = cell->incoming_animals[i]->breeding_age;
@@ -39,27 +39,29 @@ void init_message_cell_buffer(MessageCell *buff, Cell *row) {
 
 void convert_buffer_to_row(MessageCell *buff, Cell *row, int returning) {
     Animal *temp;
-
     for (int j = 0; j < N; ++j) {
         row[j].type = buff[j].type;
+        if (returning && buff[j].type == ANIMAL) {
+            temp = malloc(sizeof(Animal));
+            temp->breeding_age = buff[j].animal.breeding_age;
+            temp->modified_by_red = buff[j].animal.modified_by_red;
+            temp->starvation_age = buff[j].animal.starvation_age;
+            temp->type = buff[j].animal.type;
+
+            row[j].animal = temp;
+        }
+
         if (returning) {
             row[j].new_animals = 0;
         }
 
         for (int i = 0; i < buff[j].new_animals; ++i) {
-            temp = create_animal(buff[j].incoming_animals[i].type);
-            temp->breeding_age = buff[j].incoming_animals[i].breeding_age;
-            temp->starvation_age = buff[j].incoming_animals[i].starvation_age;
-            temp->modified_by_red = buff[j].incoming_animals[i].modified_by_red;
-            row[j].incoming_animals[row[j].new_animals++] = temp;
-        }
-
-        if (returning && buff[j].type == ANIMAL) {
-            temp = create_animal(buff[j].animal.type);
-            temp->breeding_age = buff[j].animal.breeding_age;
-            temp->starvation_age = buff[j].animal.starvation_age;
-            temp->modified_by_red = buff[j].animal.modified_by_red;
-            row[j].animal = temp;
+            Animal *inside_temp;
+            inside_temp = create_animal(buff[j].incoming_animals[i].type);
+            inside_temp->breeding_age = buff[j].incoming_animals[i].breeding_age;
+            inside_temp->starvation_age = buff[j].incoming_animals[i].starvation_age;
+            inside_temp->modified_by_red = buff[j].incoming_animals[i].modified_by_red;
+            row[j].incoming_animals[row[j].new_animals++] = inside_temp;
         }
     }
 }

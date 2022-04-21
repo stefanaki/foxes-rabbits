@@ -35,6 +35,6 @@ Animal get_animal(Cell *cell) {
     if (cell->animal != NULL) {
         return *(cell->animal);
     } else {
-        return *create_animal(FOX);
+        return *create_animal(RABBIT);
     }
 }

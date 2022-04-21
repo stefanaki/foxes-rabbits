@@ -138,8 +138,12 @@ void compute_next_position(Cell **grid, int i, int j, char animal_type,
     }
 
     for (int k = 0; k < 4; ++k) {
-        if (!c_exists[k])
+        if (!c_exists[k]) {
             continue;
+        }
+        if (c_exists[k] && c[k].type == ROCK) {
+            continue;
+        }
 
         if (c[k].type == EMPTY) {
             int result_gi = gi;
@@ -200,9 +204,8 @@ void compute_next_position(Cell **grid, int i, int j, char animal_type,
     }
 }
 
-// Resolve conflicts modified
-void resolve_conflicts(Cell *cell) {   // Function that resolves conflicts that
-    // might appear on a cell
+void resolve_conflicts(Cell *cell) {
+    // Function that resolves conflicts that might appear on a cell
 
     Animal *incoming;
     if (!cell->new_animals) {
@@ -289,6 +292,9 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
     MessageCell local_row_prev[N];
     MessageCell local_row_next[N];
 
+    MessageCell result_row_prev[N];
+    MessageCell result_row_next[N];
+
     MPI_Request requests[4];
 
     block_size = BLOCK_SIZE(rank, procs, M);
@@ -299,9 +305,7 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
             // Receive previous and next rows
             if (rank - 1 >= 0) {
                 MPI_Irecv(&ghost_row_prev, N, message_cell_dt, rank - 1, ROW_NEXT, MPI_COMM_WORLD, &requests[wait_counter++]);
-                printf("rank:%d, i:%d j:%d turn:%d 1\n", rank, i, j, turn);
                 init_message_cell_buffer(local_row_prev, grid[0]);
-                printf("rank:%d, i:%d j:%d turn:%d 2\n", rank, i, j, turn);
                 MPI_Isend(&local_row_prev, N, message_cell_dt, rank - 1, ROW_PREV, MPI_COMM_WORLD, &requests[wait_counter++]);
             }
             if (rank + 1 <= procs - 1) {
@@ -368,13 +372,13 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
             MPI_Barrier(MPI_COMM_WORLD);   // check if we can remove this after
             // rank before
             if (rank - 1 >= 0) {
-                MPI_Irecv(&local_row_prev, N, message_cell_dt, rank - 1, ROW_NEXT, MPI_COMM_WORLD, &requests[wait_counter++]);
+                MPI_Irecv(&result_row_prev, N, message_cell_dt, rank - 1, ROW_NEXT, MPI_COMM_WORLD, &requests[wait_counter++]);
 
                 MPI_Isend(&ghost_row_prev, N, message_cell_dt, rank - 1, ROW_PREV, MPI_COMM_WORLD, &requests[wait_counter++]);
             }
             // rank after
             if (rank + 1 < procs) {
-                MPI_Irecv(&local_row_next, N, message_cell_dt, rank + 1, ROW_PREV, MPI_COMM_WORLD, &requests[wait_counter++]);
+                MPI_Irecv(&result_row_next, N, message_cell_dt, rank + 1, ROW_PREV, MPI_COMM_WORLD, &requests[wait_counter++]);
 
                 MPI_Isend(&ghost_row_next, N, message_cell_dt, rank + 1, ROW_NEXT, MPI_COMM_WORLD, &requests[wait_counter++]);
             }
@@ -383,9 +387,9 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
 
             // merge message_cells with cell
             if (rank - 1 >= 0) {
-                convert_buffer_to_row(local_row_prev, grid[0], 0);
+                convert_buffer_to_row(result_row_prev, grid[0], 0);
             } else if (rank + 1 <= procs - 1) {
-                convert_buffer_to_row(local_row_next, grid[block_size - 1], 0);
+                convert_buffer_to_row(result_row_next, grid[block_size - 1], 0);
             }
             // compute merge conflicts
             for (int k = 0; k < block_size; ++k) {
@@ -404,7 +408,7 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
                     }
                 }
             }
-            if (rank == 0) {
+            if (rank == 1) {
                 print_board(grid, block_size, gen, turn);
             }
         }
