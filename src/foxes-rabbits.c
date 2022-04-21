@@ -77,7 +77,6 @@ int main(int argc, char **argv) {
     mpi_implementation(subgrid, rank, num_procs, message_cell_dt, global_sum);
     exec_time += omp_get_wtime();
     
-    fprintf(stderr, "%.1fs\n", exec_time);
 
     // // Printing board
     // if (debug) {
@@ -85,6 +84,7 @@ int main(int argc, char **argv) {
     // }
 
     if (rank == MASTER_RANK) {
+        fprintf(stderr, "%.1fs\n", exec_time);
         fprintf(stdout, "%d %d %d\n", global_sum[0], global_sum[1], global_sum[2]);
         fflush(stdout);
     }

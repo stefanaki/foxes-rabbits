@@ -317,7 +317,8 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
                 // compute missing row
                 if (i == 0 && rank - 1 >= 0) {
                     convert_buffer_to_row(ghost_row_prev, missing_row, 1);
-                } else if (i == block_size - 1 && rank + 1 <= procs - 1) {
+                } 
+                if (i == block_size - 1 && rank + 1 <= procs - 1) {
                     convert_buffer_to_row(ghost_row_next, missing_row, 1);
                 }
 
