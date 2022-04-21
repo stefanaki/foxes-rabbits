@@ -215,8 +215,9 @@ void resolve_conflicts(Cell *cell) {
 
     for (int i = 0; i < cell->new_animals; i++) {
         incoming = cell->incoming_animals[i];
-        if (!cell->animal) {
-            modify_cell(cell, ANIMAL, incoming);
+        if (cell->animal == NULL) {
+            cell->animal = incoming;
+            cell->type = ANIMAL;
             continue;
         }
 
@@ -266,15 +267,13 @@ void send_result_to_master(Cell **grid, int rank, int procs, int *global_sum) {
             if (grid[i][j].type == ROCK) {
                 counters[0]++;
             } else if (grid[i][j].type == ANIMAL) {
-                if (grid[i][j].animal->type == FOX)
+                if (grid[i][j].animal->type == RABBIT)
                     counters[1]++;
                 else
                     counters[2]++;
             }
         }
     }
-
-    printf("%d %d %d , rank: %d\n", counters[0], counters[1], counters[2], rank);
     // reduce to master
     MPI_Reduce(&counters, global_sum, 3, MPI_INT, MPI_SUM, MASTER_RANK, MPI_COMM_WORLD);
 }
@@ -353,12 +352,17 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
                             grid[landing_pos[0] - BLOCK_LOW(rank, procs, M)][landing_pos[1]]
                                 .incoming_animals[grid[landing_pos[0] - BLOCK_LOW(rank, procs, M)][landing_pos[1]].new_animals++] = grid[i][j].animal;
                         } else {
+                            Animal *temp = malloc(sizeof(Animal));
+                            temp->breeding_age = grid[i][j].animal->breeding_age;
+                            temp->modified_by_red = grid[i][j].animal->modified_by_red;
+                            temp->starvation_age = grid[i][j].animal->starvation_age;
+                            temp->type = grid[i][j].animal->type;
                             if (BLOCK_OWNER(landing_pos[0], procs, M) == rank - 1) {
                                 ghost_row_prev[landing_pos[1]]
-                                    .incoming_animals[ghost_row_prev[landing_pos[1]].new_animals++] = *grid[i][j].animal;
+                                    .incoming_animals[ghost_row_prev[landing_pos[1]].new_animals++] = *temp;
                             } else if (BLOCK_OWNER(landing_pos[0], procs, M) == rank + 1) {
                                 ghost_row_next[landing_pos[1]]
-                                    .incoming_animals[ghost_row_next[landing_pos[1]].new_animals++] = *grid[i][j].animal;
+                                    .incoming_animals[ghost_row_next[landing_pos[1]].new_animals++] = *temp;
                             }
                         }
                         grid[i][j].animal = NULL;

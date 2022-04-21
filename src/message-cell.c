@@ -65,7 +65,7 @@ void convert_buffer_to_row(MessageCell *buff, Cell *row, int returning) {
 
         for (int i = 0; i < buff[j].new_animals; ++i) {
             Animal *inside_temp = malloc(sizeof(Animal));
-            inside_temp->type = buff[j].animal.type;
+            inside_temp->type = buff[j].incoming_animals[i].type;
             inside_temp->breeding_age = buff[j].incoming_animals[i].breeding_age;
             inside_temp->starvation_age = buff[j].incoming_animals[i].starvation_age;
             inside_temp->modified_by_red = buff[j].incoming_animals[i].modified_by_red;
