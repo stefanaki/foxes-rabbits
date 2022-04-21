@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
         offsetof(struct MessageCell, animal),
         offsetof(struct MessageCell, new_animals),
         offsetof(struct MessageCell, type)};
-    MPI_Datatype message_cell_datatypes[4] = {animal_dt, animal_dt, MPI_INT, MPI_CHAR};
+    MPI_Datatype message_cell_datatypes[4] = {animal_dt, animal_dt, MPI_UINT16_T, MPI_CHAR};
     MPI_Type_create_struct(4, message_cell_blocklen, message_cell_disp, message_cell_datatypes, &message_cell_dt);
     MPI_Type_commit(&message_cell_dt);
 

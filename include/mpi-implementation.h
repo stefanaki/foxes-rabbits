@@ -30,6 +30,6 @@ void send_result_to_master(Cell **, int, int, int *);
 void mpi_implementation(Cell **, int, int, MPI_Datatype, int *);
 
 // Print the board
-void print_board(Cell **, int);
+void print_board(Cell **, int, int, int);
 
 #endif /* MPI_IMPL_LIB_H__ */

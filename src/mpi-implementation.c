@@ -25,7 +25,8 @@ extern uint32_t fox_breeding;
 extern uint32_t fox_starvation;
 extern uint32_t seed;
 
-void print_board(Cell **grid, int chunk) {
+void print_board(Cell **grid, int chunk, int gen, int turn) {
+    printf("Generation %d, %s\n", gen + 1, (!turn) ? "red" : "black");
     for (int l = 0; l <= N; l++)
         printf("---");
     printf("\n   ");
@@ -106,7 +107,6 @@ bool fox_sees_rabbit(Cell *cell, char type) {
 // Compute next position modified
 void compute_next_position(Cell **grid, int i, int j, char animal_type,
                            int rank, int procs, Cell *missing_row, int *landing_pos) {
-    int C = i * N + j;
     int p = 0;
     int rabbit_p = 0;
     int available_cells[4][2];
@@ -116,6 +116,7 @@ void compute_next_position(Cell **grid, int i, int j, char animal_type,
     bool c_exists[4] = {false, false, false, false};
 
     gi = BLOCK_LOW(rank, procs, M) + i;
+    int C = gi * N + j;
 
     if (gi - 1 >= 0) {
         c[0] =
@@ -159,7 +160,7 @@ void compute_next_position(Cell **grid, int i, int j, char animal_type,
             available_cells[p][0] = result_gi;
             available_cells[p][1] = result_j;
             p++;
-        } else if (fox_sees_rabbit(&c[k], animal_type)) {
+        } else if (c[k].animal != NULL && fox_sees_rabbit(&c[k], animal_type)) {
             int result_gi = gi;
             int result_j = j;
 
@@ -197,7 +198,6 @@ void compute_next_position(Cell **grid, int i, int j, char animal_type,
         landing_pos[0] = available_cells[res][0];
         landing_pos[1] = available_cells[res][1];
     }
-    return;
 }
 
 // Resolve conflicts modified
@@ -270,6 +270,8 @@ void send_result_to_master(Cell **grid, int rank, int procs, int *global_sum) {
             }
         }
     }
+
+    printf("%d %d %d , rank: %d\n", counters[0], counters[1], counters[2], rank);
     // reduce to master
     MPI_Reduce(&counters, global_sum, 3, MPI_INT, MPI_SUM, MASTER_RANK, MPI_COMM_WORLD);
 }
@@ -294,36 +296,30 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
     for (gen = 0; gen < generations; ++gen) {
         for (turn = 0; turn < 2; ++turn) {
             col_offset = turn;
+            // Receive previous and next rows
+            if (rank - 1 >= 0) {
+                MPI_Irecv(&ghost_row_prev, N, message_cell_dt, rank - 1, ROW_NEXT, MPI_COMM_WORLD, &requests[wait_counter++]);
+                printf("rank:%d, i:%d j:%d turn:%d 1\n", rank, i, j, turn);
+                init_message_cell_buffer(local_row_prev, grid[0]);
+                printf("rank:%d, i:%d j:%d turn:%d 2\n", rank, i, j, turn);
+                MPI_Isend(&local_row_prev, N, message_cell_dt, rank - 1, ROW_PREV, MPI_COMM_WORLD, &requests[wait_counter++]);
+            }
+            if (rank + 1 <= procs - 1) {
+                MPI_Irecv(&ghost_row_next, N, message_cell_dt, rank + 1, ROW_PREV, MPI_COMM_WORLD, &requests[wait_counter++]);
+
+                init_message_cell_buffer(local_row_next, grid[block_size - 1]);
+                MPI_Isend(&local_row_next, N, message_cell_dt, rank + 1, ROW_NEXT, MPI_COMM_WORLD, &requests[wait_counter++]);
+            }
+
+            MPI_Waitall(wait_counter, requests, MPI_STATUSES_IGNORE);
+            wait_counter = 0;
             for (i = 0; i < block_size; ++i) {
-                if (i == 0 || i == block_size - 1) {
-                    // Receive previous and next rows
-                    if (rank - 1 >= 0) {
-                        MPI_Irecv(&ghost_row_prev, N, message_cell_dt, rank - 1, ROW_NEXT, MPI_COMM_WORLD, &requests[wait_counter++]);
-
-                        init_message_cell_buffer(local_row_prev, grid[0]);
-                        MPI_Isend(&local_row_prev, N, message_cell_dt, rank - 1, ROW_PREV, MPI_COMM_WORLD, &requests[wait_counter++]);
-                    }
-                    if (rank + 1 <= procs - 1) {
-                        MPI_Irecv(&ghost_row_next, N, message_cell_dt, rank + 1, ROW_PREV, MPI_COMM_WORLD, &requests[wait_counter++]);
-
-                        init_message_cell_buffer(local_row_next, grid[block_size - 1]);
-                        MPI_Isend(&local_row_next, N, message_cell_dt, rank + 1, ROW_NEXT, MPI_COMM_WORLD, &requests[wait_counter++]);
-                    }
-
-                    MPI_Waitall(wait_counter, requests, MPI_STATUSES_IGNORE);
-                    wait_counter = 0;
-                }
-
-                printf("0 rank:%d\n", rank);
-                // rank 0 died here
                 // compute missing row
-                if (i == 0) {
-                    convert_buffer_to_row(ghost_row_prev, missing_row);
-                } else if (i == block_size - 1) {
-                    convert_buffer_to_row(ghost_row_next, missing_row);
+                if (i == 0 && rank - 1 >= 0) {
+                    convert_buffer_to_row(ghost_row_prev, missing_row, 1);
+                } else if (i == block_size - 1 && rank + 1 <= procs - 1) {
+                    convert_buffer_to_row(ghost_row_next, missing_row, 1);
                 }
-
-                printf("1 rank:%d\n", rank);
 
                 for (j = col_offset; j < N; j += 2) {
                     if (grid[i][j].type != ANIMAL)
@@ -332,16 +328,11 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
                         grid[i][j].animal->modified_by_red = false;
                         continue;
                     }
-                    printf("2 rank:%d\n", rank);
 
                     landing_pos[0] = landing_pos[1] = -1;
-
                     compute_next_position(grid, i, j, grid[i][j].animal->type, rank, procs, missing_row, landing_pos);
-
                     grid[i][j].animal->starvation_age++;
                     grid[i][j].animal->breeding_age++;
-
-                    printf("3 rank:%d\n", rank);
 
                     if (landing_pos[0] != -1 && landing_pos[1] != -1) {
                         grid[i][j].animal->modified_by_red = !turn;
@@ -356,7 +347,7 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
 
                         if (rank == BLOCK_OWNER(landing_pos[0], procs, M)) {
                             grid[landing_pos[0] - BLOCK_LOW(rank, procs, M)][landing_pos[1]]
-                                .incoming_animals[grid[landing_pos[0]][landing_pos[1]].new_animals++] = grid[i][j].animal;
+                                .incoming_animals[grid[landing_pos[0] - BLOCK_LOW(rank, procs, M)][landing_pos[1]].new_animals++] = grid[i][j].animal;
                         } else {
                             if (BLOCK_OWNER(landing_pos[0], procs, M) == rank - 1) {
                                 ghost_row_prev[j]
@@ -368,35 +359,33 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
                         }
                         modify_cell(&grid[i][j], EMPTY, NULL);
                     }
-                    printf("4 rank:%d\n", rank);
                 }
+                col_offset = !col_offset;
             }
 
             // done with computing movements and stuff
             // send back the missing cell
             MPI_Barrier(MPI_COMM_WORLD);   // check if we can remove this after
-
             // rank before
             if (rank - 1 >= 0) {
-                MPI_Irecv(&local_row_prev, N, message_cell_dt, rank - 1, ROW_PREV, MPI_COMM_WORLD, &requests[wait_counter++]);
+                MPI_Irecv(&local_row_prev, N, message_cell_dt, rank - 1, ROW_NEXT, MPI_COMM_WORLD, &requests[wait_counter++]);
 
                 MPI_Isend(&ghost_row_prev, N, message_cell_dt, rank - 1, ROW_PREV, MPI_COMM_WORLD, &requests[wait_counter++]);
             }
             // rank after
-            if (rank + 1 <= procs - 1) {
-                MPI_Irecv(&local_row_next, N, message_cell_dt, rank + 1, ROW_NEXT, MPI_COMM_WORLD, &requests[wait_counter++]);
+            if (rank + 1 < procs) {
+                MPI_Irecv(&local_row_next, N, message_cell_dt, rank + 1, ROW_PREV, MPI_COMM_WORLD, &requests[wait_counter++]);
 
                 MPI_Isend(&ghost_row_next, N, message_cell_dt, rank + 1, ROW_NEXT, MPI_COMM_WORLD, &requests[wait_counter++]);
             }
-
             MPI_Waitall(wait_counter, requests, MPI_STATUSES_IGNORE);
             wait_counter = 0;
 
             // merge message_cells with cell
             if (rank - 1 >= 0) {
-                convert_buffer_to_row(local_row_prev, grid[0]);
+                convert_buffer_to_row(local_row_prev, grid[0], 0);
             } else if (rank + 1 <= procs - 1) {
-                convert_buffer_to_row(local_row_next, grid[block_size - 1]);
+                convert_buffer_to_row(local_row_next, grid[block_size - 1], 0);
             }
             // compute merge conflicts
             for (int k = 0; k < block_size; ++k) {
@@ -415,7 +404,10 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
                     }
                 }
             }
+            if (rank == 0) {
+                print_board(grid, block_size, gen, turn);
+            }
         }
-        send_result_to_master(grid, rank, procs, global_sum);
     }
+    send_result_to_master(grid, rank, procs, global_sum);
 }
