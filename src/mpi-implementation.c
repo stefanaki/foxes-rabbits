@@ -328,11 +328,11 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
                         grid[i][j].animal->modified_by_red = false;
                         continue;
                     }
+                    grid[i][j].animal->starvation_age++;
+                    grid[i][j].animal->breeding_age++;
 
                     landing_pos[0] = landing_pos[1] = -1;
                     compute_next_position(grid, i, j, grid[i][j].animal->type, rank, procs, missing_row, landing_pos);
-                    grid[i][j].animal->starvation_age++;
-                    grid[i][j].animal->breeding_age++;
 
                     if (landing_pos[0] != -1 && landing_pos[1] != -1) {
                         grid[i][j].animal->modified_by_red = !turn;
@@ -362,8 +362,7 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
                                     .incoming_animals[ghost_row_next[landing_pos[1]].new_animals++] = *temp;
                             }
                         }
-                        grid[i][j].animal = NULL;
-                        grid[i][j].type = EMPTY;
+                        modify_cell(&grid[i][j], EMPTY, NULL);
                     }
                 }
                 col_offset = !col_offset;
@@ -391,7 +390,8 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
             if (rank > 0) {
                 convert_buffer_to_row(result_row_prev, grid[0], 0);
 
-            } else if (rank + 1 < procs) {
+            }
+            if (rank + 1 < procs) {
                 convert_buffer_to_row(result_row_next, grid[block_size - 1], 0);
             }
             // compute merge conflicts
