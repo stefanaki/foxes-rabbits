@@ -1,3 +1,6 @@
+#ifndef MESSAGE_CELL_LIB_H__
+#define MESSAGE_CELL_LIB_H__
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -5,8 +8,6 @@
 #include "animal.h"
 #include "cell.h"
 
-#ifndef MESSAGE_CELL_LIB_H__
-#define MESSAGE_CELL_LIB_H__
 
 typedef struct MessageCell {
     Animal incoming_animals[4];

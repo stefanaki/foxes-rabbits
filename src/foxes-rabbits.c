@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include "message-cell.h"
 #include "mpi-implementation.h"
 #include "stdio.h"

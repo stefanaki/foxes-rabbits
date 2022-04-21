@@ -342,7 +342,7 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
                         grid[i][j].animal->modified_by_red = !turn;
 
                         if (breeding_status(grid[i][j].animal)) {
-                            Animal *aux = create_animal(grid[i][j].type);
+                            Animal *aux = create_animal(grid[i][j].animal->type);
                             aux->modified_by_red = !turn;
 
                             change_breeding_age(grid[i][j].animal, 0);

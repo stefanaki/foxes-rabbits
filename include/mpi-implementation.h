@@ -1,8 +1,8 @@
 #ifndef MPI_IMPL_LIB_H__
 #define MPI_IMPL_LIB_H__
 
+#include <mpi.h>
 #include "cell.h"
-#include "mpi.h"
 #include "world.h"
 #include "worldgen.h"
 
