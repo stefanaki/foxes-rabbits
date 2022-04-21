@@ -297,7 +297,7 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
 
     for (gen = 0; gen < generations; ++gen) {
         for (turn = 0; turn < 2; ++turn) {
-            col_offset = BLOCK_LOW(rank, procs, M) % 2 == 0 ? 0 : 1;
+            col_offset = turn;
             // Receive previous and next rows
             if (rank > 0) {
                 MPI_Irecv(&ghost_row_prev, N, message_cell_dt, rank - 1, ROW_NEXT, MPI_COMM_WORLD, &requests[wait_counter++]);
@@ -411,9 +411,9 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
                     }
                 }
             }
-            if (rank == 1) {
+            /*if (rank == 0) {
                 print_board(grid, block_size, gen, turn);
-            }
+            }*/
         }
     }
     send_result_to_master(grid, rank, procs, global_sum);

@@ -1,7 +1,7 @@
 .PHONY: all clean
 
 CC = mpicc
-CFLAGS = -g -Wall -O3 -Iinclude
+CFLAGS = -g -Wall -O3 -Iinclude -fopenmp
 
 OUT = out
 SRC = src

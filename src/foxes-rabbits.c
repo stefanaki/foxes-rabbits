@@ -2,6 +2,7 @@
 #include "message-cell.h"
 #include "mpi-implementation.h"
 #include "stdio.h"
+#include <omp.h>
 
 #define MASTER_RANK 0
 
@@ -20,7 +21,7 @@ uint32_t seed;
 
 int main(int argc, char **argv) {
     // World world = (World){};
-    // double exec_time;
+    double exec_time;
     int rank, num_procs;
     // foxes-rabbits <# generations> <M> <N> <# rocks> <# rabbits>
     //  <rabbit breeding> <# foxes> <fox breeding> <fox starvation> <seed>
@@ -71,8 +72,12 @@ int main(int argc, char **argv) {
     int global_sum[3] = {0, 0, 0};
 
     Cell **subgrid = generate_world_subgrid(rank, num_procs);
-
+    
+    exec_time = -omp_get_wtime();
     mpi_implementation(subgrid, rank, num_procs, message_cell_dt, global_sum);
+    exec_time += omp_get_wtime();
+    
+    fprintf(stderr, "%.1fs\n", exec_time);
 
     // // Printing board
     // if (debug) {
@@ -80,7 +85,7 @@ int main(int argc, char **argv) {
     // }
 
     if (rank == MASTER_RANK) {
-        printf("%d %d %d\n", global_sum[0], global_sum[1], global_sum[2]);
+        fprintf(stdout, "%d %d %d\n", global_sum[0], global_sum[1], global_sum[2]);
         fflush(stdout);
     }
 
