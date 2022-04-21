@@ -303,12 +303,12 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
         for (turn = 0; turn < 2; ++turn) {
             col_offset = turn;
             // Receive previous and next rows
-            if (rank - 1 >= 0) {
+            if (rank > 0) {
                 MPI_Irecv(&ghost_row_prev, N, message_cell_dt, rank - 1, ROW_NEXT, MPI_COMM_WORLD, &requests[wait_counter++]);
                 init_message_cell_buffer(local_row_prev, grid[0]);
                 MPI_Isend(&local_row_prev, N, message_cell_dt, rank - 1, ROW_PREV, MPI_COMM_WORLD, &requests[wait_counter++]);
             }
-            if (rank + 1 <= procs - 1) {
+            if (rank + 1 < procs) {
                 MPI_Irecv(&ghost_row_next, N, message_cell_dt, rank + 1, ROW_PREV, MPI_COMM_WORLD, &requests[wait_counter++]);
 
                 init_message_cell_buffer(local_row_next, grid[block_size - 1]);
@@ -354,14 +354,15 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
                                 .incoming_animals[grid[landing_pos[0] - BLOCK_LOW(rank, procs, M)][landing_pos[1]].new_animals++] = grid[i][j].animal;
                         } else {
                             if (BLOCK_OWNER(landing_pos[0], procs, M) == rank - 1) {
-                                ghost_row_prev[j]
-                                    .incoming_animals[ghost_row_prev[j].new_animals++] = *grid[i][j].animal;
+                                ghost_row_prev[landing_pos[1]]
+                                    .incoming_animals[ghost_row_prev[landing_pos[1]].new_animals++] = *grid[i][j].animal;
                             } else if (BLOCK_OWNER(landing_pos[0], procs, M) == rank + 1) {
-                                ghost_row_next[j]
-                                    .incoming_animals[ghost_row_next[j].new_animals++] = *grid[i][j].animal;
+                                ghost_row_next[landing_pos[1]]
+                                    .incoming_animals[ghost_row_next[landing_pos[1]].new_animals++] = *grid[i][j].animal;
                             }
                         }
-                        modify_cell(&grid[i][j], EMPTY, NULL);
+                        grid[i][j].animal = NULL;
+                        grid[i][j].type = EMPTY;
                     }
                 }
                 col_offset = !col_offset;
@@ -371,7 +372,7 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
             // send back the missing cell
             MPI_Barrier(MPI_COMM_WORLD);   // check if we can remove this after
             // rank before
-            if (rank - 1 >= 0) {
+            if (rank > 0) {
                 MPI_Irecv(&result_row_prev, N, message_cell_dt, rank - 1, ROW_NEXT, MPI_COMM_WORLD, &requests[wait_counter++]);
 
                 MPI_Isend(&ghost_row_prev, N, message_cell_dt, rank - 1, ROW_PREV, MPI_COMM_WORLD, &requests[wait_counter++]);
@@ -386,9 +387,10 @@ void mpi_implementation(Cell **grid, int rank, int procs, MPI_Datatype message_c
             wait_counter = 0;
 
             // merge message_cells with cell
-            if (rank - 1 >= 0) {
+            if (rank > 0) {
                 convert_buffer_to_row(result_row_prev, grid[0], 0);
-            } else if (rank + 1 <= procs - 1) {
+
+            } else if (rank + 1 < procs) {
                 convert_buffer_to_row(result_row_next, grid[block_size - 1], 0);
             }
             // compute merge conflicts

@@ -28,7 +28,15 @@ void init_message_cell(MessageCell *message, Cell *cell) {
 
         message->incoming_animals[i] = *temp;
     }
-    message->animal = get_animal(cell);
+    Animal *cell_animal = malloc(sizeof(Animal));
+    if (cell->animal != NULL && cell->type == ANIMAL) {
+        cell_animal->breeding_age = cell->animal->breeding_age;
+        cell_animal->modified_by_red = cell->animal->modified_by_red;
+        cell_animal->starvation_age = cell->animal->starvation_age;
+        cell_animal->type = cell->animal->type;
+
+        message->animal = *cell_animal;
+    }
 };
 
 void init_message_cell_buffer(MessageCell *buff, Cell *row) {
@@ -40,8 +48,12 @@ void init_message_cell_buffer(MessageCell *buff, Cell *row) {
 void convert_buffer_to_row(MessageCell *buff, Cell *row, int returning) {
     Animal *temp;
     for (int j = 0; j < N; ++j) {
-        row[j].type = buff[j].type;
-        if (returning && buff[j].type == ANIMAL) {
+        if (returning != 0) {
+            row[j].type = buff[j].type;
+            row[j].new_animals = 0;
+        }
+
+        if (returning != 0 && buff[j].type == ANIMAL) {
             temp = malloc(sizeof(Animal));
             temp->breeding_age = buff[j].animal.breeding_age;
             temp->modified_by_red = buff[j].animal.modified_by_red;
@@ -51,13 +63,9 @@ void convert_buffer_to_row(MessageCell *buff, Cell *row, int returning) {
             row[j].animal = temp;
         }
 
-        if (returning) {
-            row[j].new_animals = 0;
-        }
-
         for (int i = 0; i < buff[j].new_animals; ++i) {
-            Animal *inside_temp;
-            inside_temp = create_animal(buff[j].incoming_animals[i].type);
+            Animal *inside_temp = malloc(sizeof(Animal));
+            inside_temp->type = buff[j].animal.type;
             inside_temp->breeding_age = buff[j].incoming_animals[i].breeding_age;
             inside_temp->starvation_age = buff[j].incoming_animals[i].starvation_age;
             inside_temp->modified_by_red = buff[j].incoming_animals[i].modified_by_red;

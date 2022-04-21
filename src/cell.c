@@ -30,11 +30,3 @@ bool position_empty(Cell *cell) { return cell->type == EMPTY; }
 void cell_cleanup(Cell *cell) {
     free(cell);
 }
-
-Animal get_animal(Cell *cell) {
-    if (cell->animal != NULL) {
-        return *(cell->animal);
-    } else {
-        return *create_animal(RABBIT);
-    }
-}
