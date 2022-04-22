@@ -29,16 +29,14 @@ void init_message_cell(MessageCell *message, Cell *cell) {
         message->incoming_animals[i] = *temp;
     }
 
-    Animal *cell_animal = malloc(sizeof(Animal));
     if (cell->animal != NULL && cell->type == ANIMAL) {
+        Animal *cell_animal = malloc(sizeof(Animal));
         cell_animal->breeding_age = cell->animal->breeding_age;
         cell_animal->modified_by_red = cell->animal->modified_by_red;
         cell_animal->starvation_age = cell->animal->starvation_age;
         cell_animal->type = cell->animal->type;
 
         message->animal = *cell_animal;
-    } else {
-        free(cell_animal);
     }
 };
 
@@ -66,7 +64,7 @@ void convert_buffer_to_row(MessageCell *buff, Cell *row, int returning) {
             row[j].animal = temp;
         }
 
-        if (buff[j].type != ANIMAL){
+        if (returning != 0 && buff[j].type != ANIMAL){
             row[j].animal = NULL;
         }
 
